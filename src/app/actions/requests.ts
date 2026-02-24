@@ -34,18 +34,31 @@ export async function bookRide(rideId: string) {
         throw new Error("Vous ne pouvez pas réserver votre propre trajet.")
     }
 
+    const confirmationCode = Math.random().toString(36).substring(2, 6).toUpperCase()
+
     // Insert pending request
     const { error } = await supabase
         .from('ride_requests')
         .insert({
             ride_id: rideId,
             passenger_id: user.id,
-            status: 'pending' // Default status per schema
+            status: 'pending',
+            confirmation_code: confirmationCode
         })
 
     if (error) {
         console.error("Booking error:", error)
         throw new Error("Erreur lors de la réservation.")
+    }
+
+    // Notify Driver
+    if (ride?.driver_id) {
+        await supabase.from('notifications').insert({
+            user_id: ride.driver_id,
+            title: "Nouvelle demande de réservation",
+            content: "Un passager souhaite rejoindre votre trajet.",
+            link: "/dashboard"
+        })
     }
 
     // Revalidate to update UI state
@@ -85,13 +98,25 @@ export async function acceptRequest(requestId: string, rideId: string) {
     if (updateRideError) throw new Error("Erreur mise à jour des places.")
 
     // 3. Update Request Status to 'accepted'
-    const { error: updateRequestError } = await supabase
+    const { data: request, error: updateRequestError } = await supabase
         .from('ride_requests')
         .update({ status: 'accepted' })
         .eq('id', requestId)
         .eq('status', 'pending') // Double check it was pending
+        .select('passenger_id')
+        .single()
 
     if (updateRequestError) throw new Error("Erreur acceptation de la demande.")
+
+    // 4. Notify Passenger
+    if (request && request.passenger_id) {
+        await supabase.from('notifications').insert({
+            user_id: request.passenger_id,
+            title: "Trajet Accepté ! 🎉",
+            content: "Le conducteur a accepté votre demande. Vous pouvez maintenant discuter et consulter votre code de confirmation.",
+            link: `/messages/${rideId}`
+        })
+    }
 
     revalidatePath('/dashboard')
     revalidatePath(`/trajet/${rideId}`)
@@ -105,12 +130,22 @@ export async function rejectRequest(requestId: string) {
 
     // We rely on RLS/Backend implicitly checking the user is either the passenger cancelling 
     // or driver rejecting, but for MVP we just enforce status update.
-    const { error } = await supabase
+    const { data: request, error } = await supabase
         .from('ride_requests')
         .update({ status: 'rejected' })
         .eq('id', requestId)
+        .select('passenger_id, rides(id)')
+        .single()
 
     if (error) throw new Error("Erreur lors du refus de la demande.")
+
+    if (request && request.passenger_id) {
+        await supabase.from('notifications').insert({
+            user_id: request.passenger_id,
+            title: "Trajet Refusé",
+            content: "Le conducteur a malheureusement dû refuser votre demande pour ce trajet."
+        })
+    }
 
     revalidatePath('/dashboard')
     return { success: true }

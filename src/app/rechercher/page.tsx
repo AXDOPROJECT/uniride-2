@@ -95,11 +95,11 @@ export default function RechercherTrajet() {
                         </div>
                     </div>
 
-                    <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <div className="sticky bottom-[80px] sm:static mt-6 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md sm:bg-transparent sm:dark:bg-transparent -mx-6 px-6 py-4 sm:mx-0 sm:px-0 sm:py-0 border-t border-slate-200 dark:border-slate-700 sm:border-t pt-4 z-40">
                         <button
                             type="submit"
                             disabled={isSearching}
-                            className="w-full flex justify-center items-center gap-2 rounded-md bg-indigo-600 px-4 py-3 text-base font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-70 transition-colors"
+                            className="w-full flex justify-center items-center gap-2 rounded-xl bg-indigo-600 px-4 py-4 text-base font-semibold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-70 transition-all active:scale-95"
                         >
                             {isSearching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
                             {isSearching ? "Recherche en cours..." : "Rechercher des trajets"}

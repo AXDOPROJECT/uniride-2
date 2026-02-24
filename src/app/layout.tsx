@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import TopNav from '@/components/TopNav';
+import BottomNav from '@/components/BottomNav';
+import AnnouncementsBanner from '@/components/AnnouncementsBanner';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -24,8 +27,11 @@ export default function RootLayout({
         ></script>
       </head>
       <body className={`${inter.className} h-full bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50`}>
-        <div className="flex min-h-full flex-col">
+        <div className="flex min-h-full flex-col pb-16 sm:pb-0">
+          <AnnouncementsBanner />
+          <TopNav />
           {children}
+          <BottomNav />
         </div>
       </body>
     </html>

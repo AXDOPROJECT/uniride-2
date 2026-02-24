@@ -10,6 +10,7 @@ type Request = {
     status: string;
     passenger_id: string;
     created_at: string;
+    confirmation_code?: string;
     passenger: {
         name: string | null;
         phone: string | null;
@@ -94,16 +95,23 @@ export default function DriverRequestsManager({ rideId, requests }: { rideId: st
                         )}
 
                         {req.status === 'accepted' && (
-                            <div className="flex items-center gap-2">
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/30 justify-center">
-                                    <CheckCircle2 className="w-3.5 h-3.5" /> Confirmé
-                                </span>
-                                <Link
-                                    href={`/messages/${rideId}`}
-                                    className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 text-xs font-medium text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/30 justify-center hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
-                                >
-                                    <MessageCircle className="w-3.5 h-3.5" /> Messages
-                                </Link>
+                            <div className="flex flex-col gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                                <div className="flex items-center gap-2">
+                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/30 justify-center">
+                                        <CheckCircle2 className="w-3.5 h-3.5" /> Confirmé
+                                    </span>
+                                    <Link
+                                        href={`/messages/${rideId}`}
+                                        className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 text-xs font-medium text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/30 justify-center hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
+                                    >
+                                        <MessageCircle className="w-3.5 h-3.5" /> Messages
+                                    </Link>
+                                </div>
+                                {req.confirmation_code && (
+                                    <div className="flex items-center justify-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 px-3 py-1.5 text-xs font-mono font-bold tracking-widest text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 w-full sm:w-auto">
+                                        PIN: {req.confirmation_code}
+                                    </div>
+                                )}
                             </div>
                         )}
 

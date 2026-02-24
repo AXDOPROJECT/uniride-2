@@ -109,69 +109,72 @@ export default function ProposerTrajet() {
                     </div>
                 </div>
 
-                {/* Calculation & Pricing Preview Section */}
-                {origin && destination && !calculationResult && (
-                    <div className="pt-4">
+                {/* Sticky Action Footer purely for Mobile, standard flow for Desktop */}
+                <div className="sticky bottom-[80px] sm:static mt-8 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md sm:bg-transparent sm:dark:bg-transparent -mx-4 px-4 py-4 sm:mx-0 sm:px-0 sm:py-0 border-t sm:border-none border-slate-200 dark:border-slate-800 z-40">
+
+                    {origin && destination && !calculationResult && (
                         <button
                             type="button"
                             onClick={handleCalculate}
                             disabled={isCalculating || !date}
-                            className="flex w-full justify-center items-center gap-2 rounded-md bg-slate-800 px-3 py-3 text-sm font-semibold text-white shadow-sm hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600 transition-colors disabled:opacity-70"
+                            className="flex w-full justify-center items-center gap-2 rounded-xl bg-slate-800 dark:bg-slate-700 px-4 py-4 text-base font-semibold text-white shadow-lg shadow-slate-900/10 hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600 transition-all disabled:opacity-50 active:scale-95"
                         >
                             {isCalculating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Map className="h-5 w-5" />}
-                            Calculer l'itinéraire et le prix
+                            {isCalculating ? "Calcul en cours..." : "Calculer l'itinéraire et le prix"}
                         </button>
-                    </div>
-                )}
+                    )}
 
-                {calculationResult && (
-                    <div className="mt-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 p-6 border border-indigo-100 dark:border-indigo-800/30">
-                        <h3 className="text-lg font-semibold text-indigo-900 dark:text-indigo-200 mb-4">Détails du Trajet Automatisé</h3>
+                    {calculationResult && (
+                        <div className="rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 p-5 sm:p-6 border border-indigo-100 dark:border-indigo-800/30">
+                            <h3 className="text-base sm:text-lg font-semibold text-indigo-900 dark:text-indigo-200 mb-4 hidden sm:block">
+                                Détails du Trajet Automatisé
+                            </h3>
 
-                        {calculationResult.error ? (
-                            <div className="text-red-500 font-medium p-3 bg-red-100 dark:bg-red-900/30 rounded-md">
-                                {calculationResult.error}
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                                        <Route className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                                        <span>Distance Routière Optimisée:</span>
-                                    </div>
-                                    <span className="font-bold text-slate-900 dark:text-white text-lg">
-                                        {calculationResult.distanceKm} km
-                                    </span>
+                            {calculationResult.error ? (
+                                <div className="text-red-500 font-medium p-3 bg-red-100 dark:bg-red-900/30 rounded-md text-sm">
+                                    {calculationResult.error}
                                 </div>
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                                        <Euro className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                                        <span>Tarif solidaire appliqué (par passager):</span>
+                            ) : (
+                                <div className="space-y-3 sm:space-y-4">
+                                    <div className="flex items-center justify-between text-sm sm:text-base">
+                                        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                                            <Route className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 dark:text-indigo-400" />
+                                            <span>Distance:</span>
+                                        </div>
+                                        <span className="font-bold text-slate-900 dark:text-white">
+                                            {calculationResult.distanceKm} km
+                                        </span>
                                     </div>
-                                    <span className="font-bold text-emerald-600 dark:text-emerald-400 text-2xl">
-                                        {calculationResult.price.toFixed(2)} €
-                                    </span>
+                                    <div className="flex items-center justify-between text-sm sm:text-base">
+                                        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                                            <Euro className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
+                                            <span>Tarif / passager:</span>
+                                        </div>
+                                        <span className="font-bold text-emerald-600 dark:text-emerald-400 text-lg sm:text-2xl">
+                                            {calculationResult.price.toFixed(2)} €
+                                        </span>
+                                    </div>
+
+                                    {publishError && (
+                                        <div className="mt-3 text-xs sm:text-sm font-medium text-red-500 bg-red-100 dark:bg-red-900/30 dark:text-red-400 p-3 rounded-md text-center">
+                                            {publishError}
+                                        </div>
+                                    )}
+
+                                    <button
+                                        type="button"
+                                        onClick={handlePublish}
+                                        disabled={isPublishing}
+                                        className="mt-4 sm:mt-6 flex w-full justify-center items-center gap-2 rounded-xl bg-indigo-600 px-4 py-4 text-base font-semibold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 transition-all active:scale-95"
+                                    >
+                                        {isPublishing ? <Loader2 className="h-5 w-5 animate-spin" /> : null}
+                                        {isPublishing ? "Publication en cours..." : "Confirmer et Publier"}
+                                    </button>
                                 </div>
-
-                                {publishError && (
-                                    <div className="mt-4 text-sm font-medium text-red-500 bg-red-100 dark:bg-red-900/30 dark:text-red-400 p-3 rounded-md text-center">
-                                        {publishError}
-                                    </div>
-                                )}
-
-                                <button
-                                    type="button"
-                                    onClick={handlePublish}
-                                    disabled={isPublishing}
-                                    className="mt-6 flex w-full justify-center items-center gap-2 rounded-md bg-indigo-600 px-3 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-70 transition-colors"
-                                >
-                                    {isPublishing ? <Loader2 className="h-5 w-5 animate-spin" /> : null}
-                                    {isPublishing ? "Publication en cours..." : "Confirmer et Publier le trajet"}
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                )}
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     )
