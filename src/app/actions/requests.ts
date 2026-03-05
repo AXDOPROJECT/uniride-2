@@ -3,7 +3,27 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function bookRide(rideId: string) {
+export async function isEligibleForCard(passengerId: string, driverId: string) {
+    const supabase = await createClient()
+
+    // Check if passenger has completed >= 2 rides with this driver
+    const { data, error } = await supabase
+        .from('ride_requests')
+        .select('id, rides!inner(driver_id)')
+        .eq('passenger_id', passengerId)
+        .eq('status', 'onboarded')
+        .eq('rides.driver_id', driverId)
+
+    if (error) {
+        console.error("Error checking card eligibility:", error)
+        return false
+    }
+
+    return (data?.length || 0) >= 2
+}
+
+
+export async function bookRide(rideId: string, paymentMethod: string = 'cash') {
     const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -11,13 +31,13 @@ export async function bookRide(rideId: string) {
         throw new Error("Vous devez être connecté pour réserver un trajet.")
     }
 
-    // Check if passenger already has a pending or accepted request for this ride
+    // Check if passenger already has an active request for this ride
     const { data: existingRequests } = await supabase
         .from('ride_requests')
         .select('id, status')
         .eq('ride_id', rideId)
         .eq('passenger_id', user.id)
-        .in('status', ['pending', 'accepted'])
+        .in('status', ['pending', 'accepted', 'onboarded'])
 
     if (existingRequests && existingRequests.length > 0) {
         throw new Error("Vous avez déjà une réservation en cours pour ce trajet.")
@@ -30,11 +50,17 @@ export async function bookRide(rideId: string) {
         .eq('id', rideId)
         .single()
 
-    if (ride && ride.driver_id === user.id) {
-        throw new Error("Vous ne pouvez pas réserver votre propre trajet.")
-    }
+    if (!ride) throw new Error("Trajet introuvable.")
 
     const confirmationCode = Math.random().toString(36).substring(2, 6).toUpperCase()
+
+    // Check card eligibility if requested
+    if (paymentMethod === 'card') {
+        const isEligible = await isEligibleForCard(user.id, ride.driver_id)
+        if (!isEligible) {
+            throw new Error("Le paiement par carte est réservé aux passagers réguliers de ce conducteur.")
+        }
+    }
 
     // Insert pending request
     const { error } = await supabase
@@ -43,7 +69,8 @@ export async function bookRide(rideId: string) {
             ride_id: rideId,
             passenger_id: user.id,
             status: 'pending',
-            confirmation_code: confirmationCode
+            confirmation_code: confirmationCode,
+            payment_method: paymentMethod
         })
 
     if (error) {

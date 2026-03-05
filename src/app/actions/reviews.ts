@@ -21,20 +21,55 @@ export async function submitReview(rideId: string, revieweeId: string, rating: n
         throw new Error('Vous ne pouvez pas vous évaluer vous-même');
     }
 
-    // 3. Verify that the current user was ACTUALLY an accepted passenger for this EXACT ride
-    const { data: request, error: reqError } = await supabase
-        .from('ride_requests')
-        .select('id, status')
-        .eq('ride_id', rideId)
-        .eq('passenger_id', user.id)
-        .eq('status', 'accepted')
+    // 3. Verify that the reviewer and reviewee were part of the SAME ride.
+    // Case A: Reviewer is Passenger, Reviewee is Driver
+    // Case B: Reviewer is Driver, Reviewee is Passenger
+
+    // First, check if the ride exists and get its driver
+    const { data: ride, error: rideError } = await supabase
+        .from('rides')
+        .select('driver_id')
+        .eq('id', rideId)
         .single();
 
-    if (reqError || !request) {
-        throw new Error("Vous devez être un passager accepté sur ce trajet pour laisser un avis");
+    if (rideError || !ride) {
+        throw new Error("Trajet introuvable");
     }
 
-    // 4. Submit payload
+    // Now, verify the relationship based on roles
+    let isAuthorized = false;
+
+    if (user.id === ride.driver_id) {
+        // Reviewer is the driver. The reviewee must be an accepted/onboarded/completed passenger for THIS ride.
+        const { data: request } = await supabase
+            .from('ride_requests')
+            .select('id')
+            .eq('ride_id', rideId)
+            .eq('passenger_id', revieweeId)
+            .in('status', ['accepted', 'onboarded', 'completed'])
+            .single();
+
+        if (request) isAuthorized = true;
+    } else {
+        // Reviewer is NOT the driver, so they MUST be a passenger rating the driver.
+        // Therefore, the reviewee MUST be the driver.
+        if (revieweeId === ride.driver_id) {
+            const { data: request } = await supabase
+                .from('ride_requests')
+                .select('id')
+                .eq('ride_id', rideId)
+                .eq('passenger_id', user.id)
+                .in('status', ['accepted', 'onboarded', 'completed'])
+                .single();
+
+            if (request) isAuthorized = true;
+        }
+    }
+
+    if (!isAuthorized) {
+        throw new Error("Vous n'êtes pas autorisé à laisser un avis pour cet utilisateur sur ce trajet.");
+    }
+
     const { error: insertError } = await supabase
         .from('reviews')
         .insert({
@@ -45,18 +80,36 @@ export async function submitReview(rideId: string, revieweeId: string, rating: n
             comment: comment.trim() || null
         });
 
-    // Postgres Unique Constraints: The `reviews` table has a primary key or unique index on (ride_id, reviewer_id, reviewee_id)
-    // Supabase will automatically block duplicate inserts here.
     if (insertError) {
         console.error("Erreur insertion avis:", insertError);
-        // Map common duplicate constraint errors to friendly UI messages
         if (insertError.code === '23505') {
             throw new Error("Vous avez déjà laissé un avis pour ce trajet");
         }
         throw new Error("Erreur lors de la soumission de l'avis");
     }
 
-    // 5. Revalidate common pathways where reviews might be displayed
+    // 5. Deductive Rating Logic: If rating < 3, decrement reviewee's total rating by 0.25
+    if (rating < 3) {
+        const { data: currentReviewee } = await supabase
+            .from('users')
+            .select('rating')
+            .eq('id', revieweeId)
+            .single()
+
+        const currentRating = currentReviewee?.rating || 5.0
+        const newRating = Math.max(0, currentRating - 0.25)
+        const shouldBlock = newRating <= 2.0
+
+        await supabase
+            .from('users')
+            .update({
+                rating: newRating,
+                is_blocked: shouldBlock
+            })
+            .eq('id', revieweeId)
+    }
+
+    // 6. Revalidate common pathways where reviews might be displayed
     revalidatePath('/dashboard');
     revalidatePath(`/trajet/${rideId}`);
 

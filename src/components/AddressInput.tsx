@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin } from 'lucide-react';
 import type { Location } from '@/types/location';
 import { usePlacesWidget } from 'react-google-autocomplete';
@@ -17,6 +17,10 @@ interface AddressInputProps {
 export default function AddressInput({ id, name, label, placeholder, defaultValue = '', onLocationSelect }: AddressInputProps) {
     // We only use query for raw controlled input text just in case
     const [query, setQuery] = useState(defaultValue);
+
+    useEffect(() => {
+        setQuery(defaultValue);
+    }, [defaultValue]);
 
     const { ref: materialRef } = usePlacesWidget({
         apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
@@ -56,7 +60,7 @@ export default function AddressInput({ id, name, label, placeholder, defaultValu
                     className="block w-full rounded-md border-0 py-2.5 pl-10 pr-10 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-slate-900 dark:text-white dark:ring-slate-700"
                     placeholder={placeholder || 'Entrez une adresse...'}
                     autoComplete="off"
-                    defaultValue={query}
+                    value={query}
                     onChange={(e) => setQuery(e.target.value)}
                 />
             </div>

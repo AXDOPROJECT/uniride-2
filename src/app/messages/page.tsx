@@ -1,64 +1,159 @@
-import { Send } from 'lucide-react';
+import { Megaphone } from 'lucide-react'
+import Link from 'next/link'
+import { createClient } from '@/utils/supabase/server'
+import { redirect } from 'next/navigation'
 
-export default function Messages() {
+export default async function Messages() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        redirect('/login')
+    }
+
+    // Fetch driver rides & passenger rides in parallel
+    const [driverRidesRes, passengerReqsRes] = await Promise.all([
+        supabase
+            .from('rides')
+            .select(`
+                id,
+                origin,
+                destination,
+                departure_time,
+                driver_id,
+                driver:users!rides_driver_id_fkey(id, name),
+                passengers:ride_requests(
+                    status,
+                    user:users!ride_requests_passenger_id_fkey(id, name)
+                )
+            `)
+            .eq('driver_id', user.id)
+            .order('departure_time', { ascending: false }),
+        supabase
+            .from('ride_requests')
+            .select(`
+                status,
+                ride:rides(
+                    id,
+                    origin,
+                    destination,
+                    departure_time,
+                    driver_id,
+                    driver:users!rides_driver_id_fkey(id, name)
+                )
+            `)
+            .eq('passenger_id', user.id)
+            .eq('status', 'accepted')
+    ])
+
+    const driverRides = driverRidesRes.data || []
+    const passengerReqs = passengerReqsRes.data || []
+
+    const discussions = []
+
+    // Map Driver Rides
+    for (const chat of driverRides) {
+        const acceptedPassengers = (chat.passengers as any[])?.filter(p => p.status === 'accepted') || []
+
+        let chatName = "En attente de passagers"
+        let avatar = "🚗"
+
+        if (acceptedPassengers.length === 1) {
+            chatName = acceptedPassengers[0].user?.name || "Passager"
+            avatar = acceptedPassengers[0].user?.name?.charAt(0).toUpperCase() || "🎓"
+        } else if (acceptedPassengers.length > 1) {
+            chatName = "Mes Passagers"
+            avatar = "👥"
+        }
+
+        discussions.push({
+            id: chat.id,
+            name: chatName,
+            message: `${chat.origin} → ${chat.destination}`,
+            time: new Date(chat.departure_time).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' }),
+            avatar: avatar,
+            timestamp: new Date(chat.departure_time).getTime()
+        })
+    }
+
+    // Map Passenger Rides
+    for (const req of passengerReqs) {
+        const chat = req.ride as any
+        if (!chat) continue
+
+        const driverData = chat.driver
+        const chatName = driverData?.name || "Conducteur"
+        const avatar = driverData?.name?.charAt(0).toUpperCase() || "🧔"
+
+        discussions.push({
+            id: chat.id,
+            name: chatName,
+            message: `${chat.origin} → ${chat.destination}`,
+            time: new Date(chat.departure_time).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' }),
+            avatar: avatar,
+            timestamp: new Date(chat.departure_time).getTime()
+        })
+    }
+
+    // Sort discussions by most recent first
+    discussions.sort((a, b) => b.timestamp - a.timestamp)
+
     return (
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 h-[calc(100vh-4rem)] flex flex-col">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white mb-6">
-                Messages du Trajet
-            </h1>
+        <main className="flex-1 bg-slate-50 dark:bg-black/50 overflow-y-auto">
+            <div className="max-w-xl mx-auto px-6 pt-10 pb-24 space-y-10">
 
-            {/* Chat Box Container */}
-            <div className="flex-1 overflow-hidden rounded-lg bg-white shadow dark:bg-slate-800 flex flex-col">
-                {/* Message Header */}
-                <div className="border-b border-slate-200 dark:border-slate-700 px-6 py-4">
-                    <h2 className="text-lg font-medium text-slate-900 dark:text-white">
-                        Trajet: Campus vers Centre Ville
-                    </h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Conducteur: Alex • Départ: 18h30
-                    </p>
+                {/* Header */}
+                <div className="space-y-1">
+                    <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Messages</h1>
+                    <p className="text-sm font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Vos communications</p>
                 </div>
 
-                {/* Message Thread (Placeholder) */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-4">
-
-                    <div className="flex justify-start">
-                        <div className="bg-slate-100 dark:bg-slate-700 rounded-lg px-4 py-2 max-w-md">
-                            <p className="text-sm text-slate-800 dark:text-slate-200">
-                                Salut ! On se retrouve à quel arrêt devant la fac ?
-                            </p>
-                            <span className="text-xs text-slate-500 mt-1 block">18:05</span>
-                        </div>
+                {/* Campus Announcements Link */}
+                <Link href="/messages/annonces" className="premium-card p-6 flex items-center gap-5 bg-white dark:bg-zinc-900 relative overflow-hidden group border-none block">
+                    <div className="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-zinc-800 flex items-center justify-center text-slate-400">
+                        <Megaphone className="w-8 h-8" />
                     </div>
-
-                    <div className="flex justify-end">
-                        <div className="bg-indigo-600 rounded-lg px-4 py-2 max-w-md">
-                            <p className="text-sm text-white">
-                                Devant la bibliothèque des sciences, j'y serai dans 10 min.
-                            </p>
-                            <span className="text-xs text-indigo-200 mt-1 block text-right">18:07</span>
-                        </div>
+                    <div className="flex-1">
+                        <h3 className="text-xl font-black text-slate-900 dark:text-white leading-tight uppercase tracking-tight">Annonces Campus</h3>
+                        <p className="text-sm text-slate-500 dark:text-zinc-500 font-bold">Infos officielles</p>
                     </div>
+                    <div className="w-3 h-3 rounded-full bg-red-500 shadow-lg shadow-red-500/50" />
+                </Link>
 
+                {/* Private Discussions */}
+                <div className="space-y-5">
+                    <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Discussions privées</h2>
+                    <div className="space-y-4">
+                        {discussions.length === 0 ? (
+                            <div className="text-center py-10 text-slate-500 font-medium">
+                                Vous n'avez aucune discussion active.
+                            </div>
+                        ) : (
+                            discussions.map((chat) => (
+                                <Link
+                                    key={chat.id}
+                                    href={`/messages/${chat.id}`}
+                                    className="premium-card p-5 flex items-center gap-5 bg-white dark:bg-zinc-900 hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-all border-none shadow-sm"
+                                >
+                                    <div className="w-16 h-16 rounded-3xl bg-brand-purple-soft dark:bg-brand-purple/10 flex items-center justify-center text-3xl">
+                                        {chat.avatar}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <h4 className="font-black text-slate-900 dark:text-white uppercase truncate text-lg tracking-tight">{chat.name}</h4>
+                                            <span className="text-[10px] font-black text-slate-400 uppercase">{chat.time}</span>
+                                        </div>
+                                        <p className="text-sm text-slate-500 dark:text-zinc-500 font-bold truncate">
+                                            {chat.message}
+                                        </p>
+                                    </div>
+                                </Link>
+                            ))
+                        )}
+                    </div>
                 </div>
 
-                {/* Message Input */}
-                <div className="border-t border-slate-200 dark:border-slate-700 p-4">
-                    <form className="flex gap-4">
-                        <input
-                            type="text"
-                            placeholder="Écrivez votre message..."
-                            className="block w-full rounded-md border-0 py-2 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-slate-900 dark:text-white dark:ring-slate-700"
-                        />
-                        <button
-                            type="button"
-                            className="inline-flex items-center justify-center rounded-md bg-indigo-600 p-2 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                        >
-                            <Send className="h-5 w-5" aria-hidden="true" />
-                        </button>
-                    </form>
-                </div>
             </div>
-        </div>
+        </main>
     )
 }

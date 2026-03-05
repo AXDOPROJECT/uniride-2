@@ -5,7 +5,7 @@ import Link from 'next/link';
 import AddressInput from '@/components/AddressInput';
 import type { Location } from '@/types/location';
 import { searchRides } from '@/app/actions/rides';
-import { Loader2, Search, Calendar, MapPin, Users, Euro, Star } from 'lucide-react';
+import { Loader2, Search, Calendar, Clock, MapPin, Users, Euro, Star } from 'lucide-react';
 
 // Type representing the joined shape from Supabase
 type RideResult = {
@@ -28,6 +28,7 @@ export default function RechercherTrajet() {
     const [origin, setOrigin] = useState<Location | null>(null);
     const [destination, setDestination] = useState<Location | null>(null);
     const [date, setDate] = useState('');
+    const [time, setTime] = useState('');
 
     const [isSearching, setIsSearching] = useState(false);
     const [results, setResults] = useState<RideResult[] | null>(null);
@@ -44,7 +45,12 @@ export default function RechercherTrajet() {
             const data = await searchRides(
                 origin?.address || '',
                 destination?.address || '',
-                date || undefined
+                date || undefined,
+                time || undefined,
+                origin?.lat,
+                origin?.lon,
+                destination?.lat,
+                destination?.lon
             );
 
             // Supabase returns an array of any type from joins, we cast it for type safety in the UI map
@@ -57,146 +63,155 @@ export default function RechercherTrajet() {
     };
 
     return (
-        <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-8">Rechercher un Trajet</h1>
+        <main className="flex-1 bg-slate-50 dark:bg-black/50 overflow-y-auto">
+            <div className="max-w-xl mx-auto px-6 pt-10 pb-24 space-y-8">
 
-            {/* Search Form Panel */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 md:p-8">
-                <form className="space-y-6" onSubmit={handleSearch}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <AddressInput
-                            id="origin"
-                            name="origin"
-                            label="Départ souhaité"
-                            placeholder="Ex: Talence, Pessac..."
-                            onLocationSelect={setOrigin}
-                        />
+                {/* Header */}
+                <div className="space-y-1">
+                    <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter">Trouver un Trajet</h1>
+                    <p className="text-slate-500 dark:text-zinc-500 font-medium">Recherchez votre prochain voyage étudiant.</p>
+                </div>
 
-                        <AddressInput
-                            id="destination"
-                            name="destination"
-                            label="Arrivée"
-                            placeholder="Ex: Gare St Jean, Campus 1..."
-                            onLocationSelect={setDestination}
-                        />
-                    </div>
+                {/* Search Form Panel */}
+                <div className="premium-card p-6 border-none shadow-sm space-y-6 bg-white dark:bg-zinc-900">
+                    <form className="space-y-6" onSubmit={handleSearch}>
+                        <div className="space-y-6">
+                            <AddressInput
+                                id="origin"
+                                name="origin"
+                                label="Départ souhaité"
+                                placeholder="Ex: Talence, Pessac..."
+                                onLocationSelect={setOrigin}
+                            />
 
-                    <div className="md:w-1/2">
-                        <label htmlFor="date" className="block text-sm font-medium leading-6 text-slate-900 dark:text-slate-200">Date de départ (Optionnelle)</label>
-                        <div className="mt-2 text-slate-800 dark:text-white">
-                            <input
-                                type="date"
-                                name="date"
-                                id="date"
-                                value={date}
-                                onChange={(e) => setDate(e.target.value)}
-                                className="block w-full rounded-md border-0 py-2 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-slate-900 dark:text-white dark:ring-slate-700"
+                            <AddressInput
+                                id="destination"
+                                name="destination"
+                                label="Arrivée"
+                                placeholder="Ex: Gare St Jean, Campus 1..."
+                                onLocationSelect={setDestination}
                             />
                         </div>
-                    </div>
 
-                    <div className="sticky bottom-[80px] sm:static mt-6 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md sm:bg-transparent sm:dark:bg-transparent -mx-6 px-6 py-4 sm:mx-0 sm:px-0 sm:py-0 border-t border-slate-200 dark:border-slate-700 sm:border-t pt-4 z-40">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label htmlFor="date" className="flex items-center gap-2 text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-2">
+                                    <Calendar className="w-3 h-3 text-brand-lime" />
+                                    Date
+                                </label>
+                                <input
+                                    type="date"
+                                    name="date"
+                                    id="date"
+                                    value={date}
+                                    onChange={(e) => setDate(e.target.value)}
+                                    className="block w-full rounded-2xl border-none bg-slate-50 dark:bg-zinc-800/50 py-3.5 px-4 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-lime transition-all sm:text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="time" className="flex items-center gap-2 text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-2">
+                                    <Clock className="w-3 h-3 text-brand-lime" />
+                                    Heure
+                                </label>
+                                <input
+                                    type="time"
+                                    name="time"
+                                    id="time"
+                                    value={time}
+                                    onChange={(e) => setTime(e.target.value)}
+                                    className="block w-full rounded-2xl border-none bg-slate-50 dark:bg-zinc-800/50 py-3.5 px-4 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-lime transition-all sm:text-sm"
+                                />
+                            </div>
+                        </div>
+
                         <button
                             type="submit"
                             disabled={isSearching}
-                            className="w-full flex justify-center items-center gap-2 rounded-xl bg-indigo-600 px-4 py-4 text-base font-semibold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-70 transition-all active:scale-95"
+                            className="w-full flex justify-center items-center gap-3 rounded-2xl bg-brand-lime py-4 text-black text-lg font-black shadow-xl shadow-brand-lime/10 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-70"
                         >
-                            {isSearching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
-                            {isSearching ? "Recherche en cours..." : "Rechercher des trajets"}
+                            {isSearching ? <Loader2 className="h-6 w-6 animate-spin" /> : <Search className="h-6 w-6" />}
+                            {isSearching ? "RECHERCHE..." : "RECHERCHER"}
                         </button>
-                    </div>
-                </form>
-            </div>
+                    </form>
+                </div>
 
-            {/* Results Section */}
-            <div className="mt-12 space-y-6">
-                {error && (
-                    <div className="rounded-md bg-red-50 dark:bg-red-900/30 p-4 border border-red-200 dark:border-red-800/50">
-                        <p className="text-sm font-medium text-red-800 dark:text-red-400">{error}</p>
-                    </div>
-                )}
+                {/* Results Section */}
+                <div className="space-y-6">
+                    {error && (
+                        <div className="rounded-2xl bg-red-50 dark:bg-red-900/20 p-4 border border-red-100 dark:border-red-800/20">
+                            <p className="text-sm font-bold text-red-600 dark:text-red-400 text-center">{error}</p>
+                        </div>
+                    )}
 
-                {results !== null && !isSearching && (
-                    <div className="space-y-4">
-                        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
-                            {results.length} trajet{results.length !== 1 ? 's' : ''} trouvé{results.length !== 1 ? 's' : ''}
-                        </h2>
-
-                        {results.length === 0 ? (
-                            <div className="text-center py-12 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 border-dashed">
-                                <p className="text-slate-500 dark:text-slate-400">Aucun trajet ne correspond exactement à votre recherche.</p>
-                                <p className="text-sm text-slate-400 dark:text-slate-500 mt-2">Essayez de simplifier vos lieux de départ et d'arrivée (ex: juste la ville).</p>
+                    {results !== null && !isSearching && (
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-sm font-black text-slate-400 uppercase tracking-widest">
+                                    {results.length} résultat{results.length !== 1 ? 's' : ''}
+                                </h2>
                             </div>
-                        ) : (
-                            <div className="grid gap-4">
-                                {results.map((ride) => (
-                                    <Link key={ride.id} href={`/trajet/${ride.id}`} className="block">
-                                        <div className="bg-white dark:bg-slate-800 hover:border-indigo-500 dark:hover:border-indigo-400 transition-colors duration-200 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row gap-6 justify-between items-start md:items-center cursor-pointer group">
 
-                                            {/* Route Info */}
-                                            <div className="flex-1 space-y-3">
+                            {results.length === 0 ? (
+                                <div className="premium-card p-12 text-center flex flex-col items-center justify-center space-y-4 border-dashed border-2">
+                                    <p className="text-slate-500 dark:text-zinc-500 font-bold">Aucun trajet trouvé.</p>
+                                    <p className="text-xs text-slate-400 dark:text-zinc-600 font-medium max-w-xs mx-auto">
+                                        Essayez avec des mots-clés plus larges (ex: juste la ville).
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="grid gap-4">
+                                    {results.map((ride) => (
+                                        <Link key={ride.id} href={`/trajet/${ride.id}`} className="block group">
+                                            <div className="premium-card p-5 bg-white dark:bg-zinc-900 overflow-hidden border-none shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div>
+                                                        <div className="flex items-center gap-1.5 text-xs font-black text-brand-purple uppercase tracking-tight mb-2">
+                                                            <Calendar className="w-3.5 h-3.5" />
+                                                            {new Date(ride.departure_time).toLocaleString('fr-FR', {
+                                                                weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                                                            })}
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-6 h-6 rounded-lg bg-brand-purple-soft dark:bg-brand-purple/20 flex items-center justify-center text-[10px] font-black text-brand-purple">
+                                                                {ride.driver?.name?.charAt(0) || 'U'}
+                                                            </div>
+                                                            <span className="text-sm font-bold text-slate-900 dark:text-zinc-300">
+                                                                {ride.driver?.name || 'Étudiant'}
+                                                            </span>
+                                                            {ride.driver?.avg_rating && ride.driver.avg_rating > 0 && (
+                                                                <div className="flex items-center gap-0.5 text-xs font-black text-amber-500">
+                                                                    <Star className="w-3 h-3 fill-amber-500" />
+                                                                    <span>{ride.driver.avg_rating}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <div className="text-2xl font-black text-slate-900 dark:text-white">{ride.price}€</div>
+                                                        <div className="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase">{ride.available_seats} places dispo.</div>
+                                                    </div>
+                                                </div>
+
                                                 <div className="flex items-start gap-3">
-                                                    <div className="flex flex-col items-center gap-1 mt-1">
-                                                        <div className="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></div>
-                                                        <div className="w-0.5 h-6 bg-slate-200 dark:bg-slate-600"></div>
-                                                        <div className="w-2.5 h-2.5 rounded-full border-2 border-indigo-600 dark:border-indigo-400 bg-white dark:bg-slate-800"></div>
+                                                    <div className="flex flex-col items-center gap-1 py-1">
+                                                        <div className="w-2.5 h-2.5 rounded-full border-2 border-brand-purple bg-white" />
+                                                        <div className="w-0.5 h-6 bg-slate-100 dark:bg-zinc-800 rounded-full" />
+                                                        <div className="w-2.5 h-2.5 rounded-full bg-brand-purple" />
                                                     </div>
-                                                    <div className="space-y-4">
-                                                        <div>
-                                                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-0.5 font-medium">Départ</p>
-                                                            <p className="font-semibold text-slate-900 dark:text-slate-100 line-clamp-1">{ride.origin}</p>
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-0.5 font-medium">Arrivée</p>
-                                                            <p className="font-semibold text-slate-900 dark:text-slate-100 line-clamp-1">{ride.destination}</p>
-                                                        </div>
+                                                    <div className="space-y-3 flex-1 min-w-0">
+                                                        <div className="text-sm font-bold text-slate-900 dark:text-zinc-100 truncate">{ride.origin}</div>
+                                                        <div className="text-sm font-bold text-slate-900 dark:text-zinc-100 truncate">{ride.destination}</div>
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            {/* Generic Info */}
-                                            <div className="flex flex-row md:flex-col items-center md:items-end w-full md:w-auto gap-4 justify-between border-t md:border-t-0 border-slate-100 dark:border-slate-700 pt-4 md:pt-0">
-                                                <div className="flex flex-col gap-2">
-                                                    <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                                                        <Calendar className="w-4 h-4" />
-                                                        {new Date(ride.departure_time).toLocaleString('fr-FR', {
-                                                            weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-                                                        })}
-                                                    </div>
-
-                                                    {/* Rating Display */}
-                                                    {ride.driver && ride.driver.avg_rating && ride.driver.avg_rating > 0 && (
-                                                        <div className="flex items-center gap-1.5 text-sm font-medium text-amber-600 dark:text-amber-400">
-                                                            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                                                            <span>{ride.driver.avg_rating}</span>
-                                                            <span className="text-slate-400 dark:text-slate-500 font-normal">({ride.driver.total_reviews})</span>
-                                                        </div>
-                                                    )}
-
-                                                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                                                        <div className="flex items-center gap-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-1 rounded-md">
-                                                            <Users className="w-3.5 h-3.5" />
-                                                            <span>{ride.available_seats} places</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="text-right flex items-center gap-1">
-                                                    <p className="text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">
-                                                        {ride.price}
-                                                    </p>
-                                                    <Euro className="w-5 h-5 text-emerald-600 dark:text-emerald-400 stroke-[2.5]" />
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </Link>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
+        </main>
     )
 }

@@ -2,15 +2,16 @@
 
 import { useState } from 'react'
 import { updateProfile } from '@/app/actions/user'
-import { Loader2, Save, User, Phone, ShieldCheck } from 'lucide-react'
+import { Loader2, Save, User, Phone, ShieldCheck, Star } from 'lucide-react'
 
 type ProfileProps = {
     initialName: string | null;
     initialPhone: string | null;
     isVerified: boolean | null;
+    rating: number | null;
 }
 
-export default function ProfileForm({ initialName, initialPhone, isVerified }: ProfileProps) {
+export default function ProfileForm({ initialName, initialPhone, isVerified, rating }: ProfileProps) {
     const [isSaving, setIsSaving] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
@@ -36,12 +37,20 @@ export default function ProfileForm({ initialName, initialPhone, isVerified }: P
         <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Paramètres du profil</h2>
-                {isVerified && (
-                    <div className="flex items-center gap-1.5 text-sm font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-800/50">
-                        <ShieldCheck className="w-4 h-4" />
-                        <span>Permis vérifié</span>
-                    </div>
-                )}
+                <div className="flex flex-wrap items-center gap-2">
+                    {rating !== null && (
+                        <div className="flex items-center gap-1.5 text-sm font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-3 py-1.5 rounded-full border border-amber-200 dark:border-amber-800/50">
+                            <Star className="w-4 h-4 fill-amber-500" />
+                            <span>{rating.toFixed(1)} / 5.0</span>
+                        </div>
+                    )}
+                    {isVerified && (
+                        <div className="flex items-center gap-1.5 text-sm font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-800/50">
+                            <ShieldCheck className="w-4 h-4" />
+                            <span>Permis vérifié</span>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

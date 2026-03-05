@@ -68,45 +68,47 @@ export default function ReportModal({ reportedUserId, reportedUserName, rideId, 
             </div>
 
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-md shadow-xl relative animate-in zoom-in-95 duration-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-6 animate-in fade-in duration-300">
+                    <div className="bg-white dark:bg-zinc-900 rounded-[32px] p-8 w-full max-w-md shadow-2xl relative animate-in zoom-in-95 duration-300 border-none">
 
                         <button
                             onClick={handleClose}
-                            className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                            className="absolute top-6 right-6 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all"
                         >
-                            <X className="w-5 h-5" />
+                            <X className="w-5 h-5 text-slate-400" />
                         </button>
 
-                        <div className="flex items-center gap-2 mb-2">
-                            <AlertTriangle className="w-5 h-5 text-red-500" />
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-white">Signaler l'utilisateur</h3>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2.5 rounded-2xl bg-red-50 dark:bg-red-900/20">
+                                <AlertTriangle className="w-6 h-6 text-red-500" />
+                            </div>
+                            <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Signaler</h3>
                         </div>
 
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
-                            Vous signalez actuellement <span className="font-semibold text-slate-700 dark:text-slate-200">{reportedUserName}</span>. Ce signalement sera transmis à nos administrateurs.
+                        <p className="text-sm font-bold text-slate-500 dark:text-zinc-500 mb-8 leading-relaxed">
+                            Vous signalez actuellement <span className="text-slate-900 dark:text-white">{reportedUserName}</span>. Ce signalement sera transmis à nos administrateurs.
                         </p>
 
                         {success ? (
-                            <div className="text-center py-6 animate-in slide-in-from-bottom-2">
-                                <div className="mx-auto w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-3">
-                                    <Flag className="w-6 h-6 text-red-600 dark:text-red-400 fill-red-600 dark:fill-red-400" />
+                            <div className="text-center py-10 animate-in slide-in-from-bottom-4">
+                                <div className="mx-auto w-20 h-20 bg-emerald-50 dark:bg-emerald-900/20 rounded-3xl flex items-center justify-center mb-4">
+                                    <Flag className="w-8 h-8 text-emerald-600 fill-emerald-600" />
                                 </div>
-                                <p className="font-semibold text-red-700 dark:text-red-400">Signalement envoyé</p>
-                                <p className="text-sm text-red-600/80 dark:text-red-500 mt-1">Notre équipe va examiner la situation dans les plus brefs délais.</p>
+                                <p className="text-xl font-black text-slate-900 dark:text-white mb-2 uppercase">MERCI</p>
+                                <p className="text-sm font-bold text-slate-500">Signalement envoyé. Notre équipe va examiner la situation.</p>
                             </div>
                         ) : (
-                            <form onSubmit={handleSubmit} className="space-y-5">
+                            <form onSubmit={handleSubmit} className="space-y-6">
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
                                         Motif du signalement *
                                     </label>
                                     <select
                                         value={reason}
                                         onChange={(e) => setReason(e.target.value)}
                                         required
-                                        className="block w-full rounded-md border-0 py-2.5 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-red-600 sm:text-sm sm:leading-6 dark:bg-slate-800 dark:text-white dark:ring-slate-700"
+                                        className="block w-full rounded-2xl border-none bg-slate-50 dark:bg-zinc-800/50 py-4 px-5 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-purple transition-all sm:text-sm appearance-none"
                                     >
                                         <option value="" disabled>Sélectionnez un motif...</option>
                                         {REPORT_REASONS.map(r => (
@@ -116,8 +118,8 @@ export default function ReportModal({ reportedUserId, reportedUserName, rideId, 
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                        Plus de détails *
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">
+                                        Détails *
                                     </label>
                                     <textarea
                                         rows={4}
@@ -125,20 +127,20 @@ export default function ReportModal({ reportedUserId, reportedUserName, rideId, 
                                         onChange={(e) => setDescription(e.target.value)}
                                         required
                                         placeholder="Décrivez la situation en détail..."
-                                        className="block w-full rounded-md border-0 py-2.5 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-red-600 sm:text-sm sm:leading-6 dark:bg-slate-800 dark:text-white dark:ring-slate-700"
+                                        className="block w-full rounded-2xl border-none bg-slate-50 dark:bg-zinc-800/50 py-4 px-5 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-purple transition-all sm:text-sm placeholder:text-slate-400"
                                     />
                                 </div>
 
                                 <button
                                     type="submit"
                                     disabled={isSubmitting || !reason || !description.trim()}
-                                    className="w-full flex justify-center items-center gap-2 rounded-md bg-red-600 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:opacity-50"
+                                    className="w-full flex justify-center items-center gap-2 rounded-3xl bg-red-600 py-5 text-lg font-black text-white shadow-xl shadow-red-600/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
                                 >
-                                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Envoyer le signalement"}
+                                    {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : "ENVOYER"}
                                 </button>
 
-                                <p className="text-xs text-center text-slate-400 mt-4">
-                                    En cas d'urgence immédiate sur le campus, contactez le 112 ou la sécurité.
+                                <p className="text-[10px] font-black text-center text-slate-400 uppercase tracking-tight mt-4">
+                                    En cas d'urgence sur le campus, contactez le 112.
                                 </p>
                             </form>
                         )}

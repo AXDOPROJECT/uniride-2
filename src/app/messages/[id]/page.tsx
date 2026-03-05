@@ -4,7 +4,8 @@ import ChatInterface from './ChatInterface'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 
-export default async function MessagePage({ params }: { params: { id: string } }) {
+export default async function MessagePage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+    const params = await paramsPromise
     const supabase = await createClient()
 
     // 1. Authenticate Request

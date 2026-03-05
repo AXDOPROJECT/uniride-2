@@ -1,26 +1,67 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FFFFFF;
+  --foreground: #1F2937;
+  --brand-lime: #d9ff00;
+  --brand-lime-soft: #faffdb;
+  --brand-purple: #d9ff00;
+  /* Overriding for compatibility with existing classes */
+  --brand-purple-soft: #faffdb;
+  --brand-indigo: #000000;
+  --card-bg: #FFFFFF;
+  --border-soft: #F3F4F6;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-brand-purple: var(--brand-purple);
+  --color-brand-purple-soft: var(--brand-purple-soft);
+  --color-brand-indigo: var(--brand-indigo);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0A0A0B;
+    --foreground: #F9FAFB;
+    --card-bg: #111113;
+    --border-soft: #1F1F23;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom transitions and soft shadows */
+.premium-shadow {
+  box-shadow: 0 10px 25px -5px rgba(217, 255, 0, 0.1), 0 8px 10px -6px rgba(217, 255, 0, 0.1);
+}
+
+.premium-card {
+  @apply bg-white dark:bg-zinc-900 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-xl shadow-slate-200/50 dark:shadow-none transition-all hover:scale-[1.01];
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite !important;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
 }

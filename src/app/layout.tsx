@@ -4,21 +4,38 @@ import './globals.css';
 import TopNav from '@/components/TopNav';
 import BottomNav from '@/components/BottomNav';
 import AnnouncementsBanner from '@/components/AnnouncementsBanner';
+import { createClient } from '@/utils/supabase/server';
+import { redirect } from 'next/navigation';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'UNIRIDE - Le covoiturage étudiant par excellence',
-  description: 'Trouvez et proposez des trajets sécurisés et abordables entre étudiants.',
+  description: 'La solution premium de covoiturage réservée aux étudiants. Sécurité, simplicité et économies.',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from('users')
+      .select('is_blocked')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.is_blocked) {
+      redirect('/blocked');
+    }
+  }
+
   return (
-    <html lang="fr" className="h-full antialiased dark">
+    <html lang="fr" className="h-full bg-slate-50 dark:bg-black antialiased selection:bg-brand-purple/30">
       <head>
         <script
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
@@ -26,11 +43,13 @@ export default function RootLayout({
           defer
         ></script>
       </head>
-      <body className={`${inter.className} h-full bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50`}>
-        <div className="flex min-h-full flex-col pb-16 sm:pb-0">
+      <body className={`${inter.className} h-full bg-slate-50 text-slate-900 dark:bg-zinc-950 dark:text-zinc-50`}>
+        <div className="flex min-h-full flex-col pb-20 sm:pb-0">
           <AnnouncementsBanner />
           <TopNav />
-          {children}
+          <main className="flex-1">
+            {children}
+          </main>
           <BottomNav />
         </div>
       </body>

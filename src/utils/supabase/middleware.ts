@@ -35,28 +35,43 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    // Define routes that require authentication
-    const protectedRoutes = ['/dashboard', '/proposer', '/messages']
+    // Define routes that require authentication (prefix matching)
+    const protectedRoutes = ['/dashboard', '/proposer', '/rechercher', '/messages', '/alertes', '/profil', '/trajet']
 
     // Define routes that are only for unauthenticated users (like login/signup)
     const authRoutes = ['/login', '/signup']
 
     const path = request.nextUrl.pathname
+
     const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route))
+    const isRoot = path === '/'
     const isAuthRoute = authRoutes.some(route => path.startsWith(route))
 
-    if (isProtectedRoute && !user) {
+    if (!user && isProtectedRoute) {
         // If user is not logged in and tries to access a protected route, redirect to login
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         return NextResponse.redirect(url)
     }
 
-    if (isAuthRoute && user) {
-        // If user is logged in and tries to access login/signup, redirect to dashboard
+    if (user && isAuthRoute) {
+        // If user is logged in and tries to access login/signup, redirect to home
         const url = request.nextUrl.clone()
-        url.pathname = '/dashboard'
+        url.pathname = '/'
         return NextResponse.redirect(url)
+    }
+
+    // MANDATORY TERMS OF USE CHECK
+    if (user) {
+        const hasAcceptedTerms = user.app_metadata?.has_accepted_terms || user.user_metadata?.has_accepted_terms
+        const isTermsPage = path === '/terms'
+
+        if (!hasAcceptedTerms && !isTermsPage && !isAuthRoute) {
+            // Force redirect to terms page if not accepted
+            const url = request.nextUrl.clone()
+            url.pathname = '/terms'
+            return NextResponse.redirect(url)
+        }
     }
 
     // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're

@@ -22,7 +22,7 @@ export async function login(formData: FormData) {
     }
 
     revalidatePath('/', 'layout')
-    redirect('/dashboard')
+    redirect('/')
 }
 
 export async function signup(formData: FormData) {
@@ -47,11 +47,16 @@ export async function signup(formData: FormData) {
     })
 
     if (error) {
-        redirect('/signup?error=Erreur%20lors%20de%20la%20creation%20de%20compte')
+        if (error.code === 'over_email_send_rate_limit') {
+            redirect('/signup?error=Limite%20d\'envoi d\'e-mails%20atteinte.%20Veuillez%20désactiver%20la%20confirmation%20par%20e-mail%20dans%20votre%20Dashboard%20Supabase.')
+        }
+        // Include the actual error message to help the user debug (e.g., SMTP verification errors)
+        const errorMessage = encodeURIComponent(error.message)
+        redirect(`/signup?error=${errorMessage}`)
     }
 
     revalidatePath('/', 'layout')
-    redirect('/dashboard')
+    redirect('/')
 }
 
 export async function signout() {

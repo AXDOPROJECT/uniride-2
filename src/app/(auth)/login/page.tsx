@@ -8,71 +8,72 @@ export default async function Login({
     const error = (await searchParams)?.error;
 
     return (
-        <div className="flex flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-            <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-                <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight">
-                    Connectez-vous à votre compte
-                </h2>
-            </div>
+        <main className="flex-1 bg-slate-50 dark:bg-black/50 overflow-y-auto">
+            <div className="max-w-md mx-auto px-6 py-20 flex flex-col justify-center min-h-[80vh] space-y-10">
 
-            <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                {error && (
-                    <div className="mb-4 text-sm font-medium text-red-500 bg-red-100 dark:bg-red-900/30 dark:text-red-400 p-3 rounded-md text-center">
-                        {error}
+                {/* Logo & Welcome */}
+                <div className="text-center space-y-3">
+                    <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-brand-lime shadow-2xl shadow-brand-lime/20 mb-2 overflow-hidden border-4 border-white dark:border-zinc-800">
+                        <img src="/logo.png" alt="UNIRIDE Logo" className="w-full h-full object-cover" />
                     </div>
-                )}
-                <form className="space-y-6" action={login}>
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium leading-6">
-                            Adresse e-mail
-                        </label>
-                        <div className="mt-2">
-                            <input
-                                id="email"
-                                name="email"
-                                type="email"
-                                autoComplete="email"
-                                required
-                                className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-slate-900"
-                            />
-                        </div>
-                    </div>
+                    <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Bonjour !</h1>
+                    <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Connectez-vous à UNIRIDE</p>
+                </div>
 
-                    <div>
-                        <div className="flex items-center justify-between">
-                            <label htmlFor="password" className="block text-sm font-medium leading-6">
-                                Mot de passe
-                            </label>
+                {/* Form Card */}
+                <div className="premium-card p-8 space-y-8">
+                    {error && (
+                        <div className="p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/20 text-red-500 text-sm font-bold text-center">
+                            {error}
                         </div>
-                        <div className="mt-2">
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                autoComplete="current-password"
-                                required
-                                className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-slate-900"
-                            />
-                        </div>
-                    </div>
+                    )}
 
-                    <div>
+                    <form className="space-y-6" action={login}>
+                        <div className="space-y-4">
+                            <div>
+                                <label htmlFor="email" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Adresse e-mail</label>
+                                <input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    autoComplete="email"
+                                    required
+                                    placeholder="nom@ecole.fr"
+                                    className="block w-full rounded-2xl border-none bg-slate-50 dark:bg-zinc-800/50 py-4 px-5 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-purple transition-all sm:text-sm"
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="password" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Mot de passe</label>
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    autoComplete="current-password"
+                                    required
+                                    placeholder="••••••••"
+                                    className="block w-full rounded-2xl border-none bg-slate-50 dark:bg-zinc-800/50 py-4 px-5 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-purple transition-all sm:text-sm"
+                                />
+                            </div>
+                        </div>
+
                         <button
                             type="submit"
-                            className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                            className="flex w-full justify-center rounded-3xl bg-brand-purple py-5 text-lg font-black text-white shadow-xl shadow-brand-purple/30 hover:scale-[1.02] active:scale-95 transition-all"
                         >
-                            Se connecter
+                            SE CONNECTER
                         </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
 
-                <p className="mt-10 text-center text-sm text-slate-500">
+                {/* Signup Link */}
+                <p className="text-center text-sm font-bold text-slate-400">
                     Pas encore membre ?{' '}
-                    <a href="/signup" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
+                    <a href="/signup" className="text-brand-purple hover:underline">
                         Créer un compte
                     </a>
                 </p>
             </div>
-        </div>
+        </main>
     )
 }
