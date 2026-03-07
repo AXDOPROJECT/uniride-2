@@ -35,10 +35,24 @@ export default async function ProfilPage() {
                         <p className="text-slate-500 dark:text-zinc-500 font-bold">Étudiant</p>
                     </div>
 
-                    {/* Rating */}
-                    <div className="flex items-center gap-1 bg-white dark:bg-zinc-900 px-3 py-1.5 rounded-2xl shadow-sm border border-slate-100 dark:border-zinc-800 mx-auto">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-black text-slate-900 dark:text-white">{profile?.rating || '5'}</span>
+                    {/* Rating and KYC Badge */}
+                    <div className="flex flex-col items-center gap-2">
+                        <div className="flex items-center gap-1 bg-white dark:bg-zinc-900 px-3 py-1.5 rounded-2xl shadow-sm border border-slate-100 dark:border-zinc-800 mx-auto">
+                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                            <span className="text-sm font-black text-slate-900 dark:text-white">{profile?.rating || '5'}</span>
+                        </div>
+
+                        {profile?.license_status === 'verified' ? (
+                            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#ccff00]/20 text-[#8ab300] dark:text-[#ccff00] font-bold text-xs rounded-full uppercase tracking-wide">
+                                <span className="w-2 h-2 rounded-full bg-[#a3cc00]"></span>
+                                Conducteur Vérifié
+                            </div>
+                        ) : (
+                            <a href="/verification" className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-600 font-bold text-xs rounded-full uppercase tracking-wide hover:bg-red-100 transition-colors">
+                                <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                                Non-Vérifié (Cliquez ici)
+                            </a>
+                        )}
                     </div>
                 </div>
 
