@@ -47,6 +47,11 @@ export default async function ProfilPage() {
                                 <span className="w-2 h-2 rounded-full bg-[#a3cc00]"></span>
                                 Conducteur Vérifié
                             </div>
+                        ) : profile?.license_status === 'pending' ? (
+                            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 font-bold text-xs rounded-full uppercase tracking-wide">
+                                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                                Analyse en cours...
+                            </div>
                         ) : (
                             <a href="/verification" className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-600 font-bold text-xs rounded-full uppercase tracking-wide hover:bg-red-100 transition-colors">
                                 <span className="w-2 h-2 rounded-full bg-red-500"></span>
