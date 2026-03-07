@@ -19,7 +19,7 @@ export default async function Page() {
   }
 
   return (
-    <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-black/50">
+    <main className="flex-1 overflow-y-auto bg-transparent">
       <div className="max-w-xl mx-auto px-6 pt-10 pb-24 space-y-10">
 
         {/* Branding */}

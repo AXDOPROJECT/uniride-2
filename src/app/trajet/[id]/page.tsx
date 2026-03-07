@@ -86,7 +86,7 @@ export default async function Page({ params: paramsPromise }: { params: Promise<
     const isFull = ride.available_seats === 0;
 
     return (
-        <main className="flex-1 bg-slate-50 dark:bg-black/50 overflow-y-auto">
+        <main className="flex-1 bg-transparent overflow-y-auto">
             <div className="max-w-xl mx-auto px-6 pt-10 pb-24 space-y-8">
 
                 {/* Back Button */}

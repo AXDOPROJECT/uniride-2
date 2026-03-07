@@ -35,7 +35,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="fr" className="h-full bg-slate-50 dark:bg-black antialiased selection:bg-brand-purple/30">
+    <html lang="fr" className="h-full antialiased selection:bg-brand-blue/30 dark">
       <head>
         <script
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
@@ -43,7 +43,7 @@ export default async function RootLayout({
           defer
         ></script>
       </head>
-      <body className={`${inter.className} h-full bg-slate-50 text-slate-900 dark:bg-zinc-950 dark:text-zinc-50`}>
+      <body className={`${inter.className} h-full`}>
         <div className="flex min-h-full flex-col pb-20 sm:pb-0">
           <AnnouncementsBanner />
           <TopNav />

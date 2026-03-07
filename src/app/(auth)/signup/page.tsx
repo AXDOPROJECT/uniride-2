@@ -8,7 +8,7 @@ export default async function Signup({
     const error = (await searchParams)?.error;
 
     return (
-        <main className="flex-1 bg-slate-50 dark:bg-black/50 overflow-y-auto">
+        <main className="flex-1 bg-transparent overflow-y-auto">
             <div className="max-w-md mx-auto px-6 py-20 flex flex-col justify-center min-h-[80vh] space-y-10">
                 <div className="text-center space-y-3">
                     <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Inscription</h1>

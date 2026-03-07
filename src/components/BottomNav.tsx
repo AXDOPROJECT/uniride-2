@@ -26,35 +26,33 @@ export default function BottomNav() {
                             key={item.name}
                             href={item.href}
                             className={cn(
-                                "flex flex-col items-center justify-center w-full h-full space-y-1 transition-all active:scale-95",
-                                isActive
-                                    ? "text-slate-900 dark:text-white"
-                                    : "text-slate-400 hover:text-slate-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+                                "flex flex-col items-center justify-center w-full h-full space-y-1 transition-all active:scale-95 group"
                             )}
                         >
                             <div className={cn(
-                                "p-1.5 rounded-xl transition-all duration-300 flex items-center justify-center overflow-hidden",
-                                isActive ? "bg-brand-purple text-white shadow-md shadow-brand-purple/30 scale-110" : "bg-transparent text-slate-400"
+                                "p-1.5 transition-all duration-300 flex items-center justify-center overflow-hidden",
+                                isActive ? "scale-110" : "scale-100 group-hover:scale-105"
                             )}>
                                 {item.name === 'Accueil' ? (
-                                    <img
-                                        src="/logo.png"
-                                        alt="UR"
-                                        className={cn(
-                                            "w-6 h-6 object-cover rounded-md",
-                                            !isActive && "grayscale opacity-70"
-                                        )}
-                                    />
+                                    <div className={cn(
+                                        "w-6 h-6 rounded-md overflow-hidden ring-1 shadow-lg transition-all",
+                                        isActive ? "ring-[#3B82F6] shadow-[#3B82F6]/50" : "ring-white/10 opacity-70"
+                                    )}>
+                                        <img src="/logo.png" alt="UR" className="w-full h-full object-cover" />
+                                    </div>
                                 ) : (
                                     <item.icon
-                                        className="w-6 h-6"
+                                        className={cn(
+                                            "w-6 h-6 transition-colors duration-300",
+                                            isActive ? "text-[#3B82F6] drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]" : "text-[#9CA3AF]"
+                                        )}
                                         strokeWidth={isActive ? 2.5 : 2}
                                     />
                                 )}
                             </div>
                             <span className={cn(
                                 "text-[10px] font-black tracking-tight transition-colors duration-300",
-                                isActive ? "text-brand-purple dark:text-indigo-400 uppercase" : "text-slate-500 dark:text-zinc-500"
+                                isActive ? "text-[#3B82F6] drop-shadow-[0_0_4px_rgba(59,130,246,0.4)]" : "text-[#9CA3AF]"
                             )}>
                                 {item.name}
                             </span>
