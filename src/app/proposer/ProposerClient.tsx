@@ -129,7 +129,7 @@ export default function ProposerTrajet() {
                                 type="button"
                                 onClick={handleCalculate}
                                 disabled={isCalculating || !origin || !destination || !date}
-                                className="flex w-full justify-center items-center gap-2 rounded-3xl bg-slate-900 dark:bg-white dark:text-black py-5 text-lg font-black shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30"
+                                className="w-full premium-btn bg-slate-900 dark:bg-white dark:text-slate-900 py-5 text-lg gap-3"
                             >
                                 {isCalculating ? <Loader2 className="h-6 w-6 animate-spin" /> : <Map className="h-6 w-6" />}
                                 {isCalculating ? "Calcul en cours..." : "VOIR LE PRIX"}
@@ -164,7 +164,7 @@ export default function ProposerTrajet() {
                                             type="button"
                                             onClick={handlePublish}
                                             disabled={isPublishing}
-                                            className="flex w-full justify-center items-center gap-2 rounded-3xl bg-brand-purple py-5 text-xl font-black text-white shadow-xl shadow-brand-purple/30 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                                            className="w-full premium-btn text-xl gap-3 py-5"
                                         >
                                             {isPublishing ? <Loader2 className="h-7 w-7 animate-spin" /> : null}
                                             {isPublishing ? "PUBLICATION..." : "CONFIRMER ET PUBLIER"}

@@ -8,103 +8,92 @@ export default async function Signup({
     const error = (await searchParams)?.error;
 
     return (
-        <div className="flex flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-            <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-                <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight">
-                    Créez votre compte étudiant
-                </h2>
-            </div>
+        <main className="flex-1 bg-slate-50 dark:bg-black/50 overflow-y-auto">
+            <div className="max-w-md mx-auto px-6 py-20 flex flex-col justify-center min-h-[80vh] space-y-10">
+                <div className="text-center space-y-3">
+                    <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Inscription</h1>
+                    <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Créez votre compte Uniride</p>
+                </div>
 
-            <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                {error && (
-                    <div className="mb-4 text-sm font-medium text-red-500 bg-red-100 dark:bg-red-900/30 dark:text-red-400 p-3 rounded-md text-center">
-                        {error}
-                    </div>
-                )}
-                <form className="space-y-6" action={signup}>
-                    <div>
-                        <label htmlFor="name" className="block text-sm font-medium leading-6">
-                            Nom complet
-                        </label>
-                        <div className="mt-2">
-                            <input
-                                id="name"
-                                name="name"
-                                type="text"
-                                required
-                                className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-slate-900"
-                            />
+                <div className="premium-card p-8 space-y-8">
+                    {error && (
+                        <div className="p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/20 text-red-500 text-sm font-bold text-center">
+                            {error}
                         </div>
-                    </div>
+                    )}
 
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium leading-6">
-                            Adresse e-mail universitaire
-                        </label>
-                        <div className="mt-2">
-                            <input
-                                id="email"
-                                name="email"
-                                type="email"
-                                autoComplete="email"
-                                required
-                                className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-slate-900"
-                            />
+                    <form className="space-y-6" action={signup}>
+                        <div className="space-y-4">
+                            <div>
+                                <label htmlFor="name" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nom complet</label>
+                                <input
+                                    id="name"
+                                    name="name"
+                                    type="text"
+                                    required
+                                    placeholder="Léo Martin"
+                                    className="block w-full rounded-2xl border-none bg-slate-50 dark:bg-zinc-800/50 py-4 px-5 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-purple transition-all sm:text-sm"
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="email" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">E-mail universitaire</label>
+                                <input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    autoComplete="email"
+                                    required
+                                    placeholder="nom@ecole.fr"
+                                    className="block w-full rounded-2xl border-none bg-slate-50 dark:bg-zinc-800/50 py-4 px-5 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-purple transition-all sm:text-sm"
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="password" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Mot de passe</label>
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    autoComplete="new-password"
+                                    required
+                                    minLength={6}
+                                    placeholder="••••••••"
+                                    className="block w-full rounded-2xl border-none bg-slate-50 dark:bg-zinc-800/50 py-4 px-5 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-purple transition-all sm:text-sm"
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="role" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Je souhaite principalement</label>
+                                <select
+                                    id="role"
+                                    name="role"
+                                    defaultValue="passenger"
+                                    className="block w-full rounded-2xl border-none bg-slate-50 dark:bg-zinc-800/50 py-4 px-5 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-brand-purple transition-all sm:text-sm"
+                                >
+                                    <option value="passenger">Réserver des trajets (Passager)</option>
+                                    <option value="driver">Conduire (Conducteur)</option>
+                                    <option value="both">Les deux</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
 
-                    <div>
-                        <label htmlFor="password" className="block text-sm font-medium leading-6">
-                            Mot de passe
-                        </label>
-                        <div className="mt-2">
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                autoComplete="new-password"
-                                required
-                                minLength={6}
-                                className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-slate-900"
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label htmlFor="role" className="block text-sm font-medium leading-6">
-                            Je souhaite principallement :
-                        </label>
-                        <div className="mt-2">
-                            <select
-                                id="role"
-                                name="role"
-                                defaultValue="passenger"
-                                className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-slate-900"
-                            >
-                                <option value="passenger">Réserver des trajets (Passager)</option>
-                                <option value="driver">Conduire (Conducteur)</option>
-                                <option value="both">Les deux</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
                         <button
                             type="submit"
-                            className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                            className="w-full premium-btn text-lg gap-3 py-5"
                         >
-                            S'inscrire
+                            S'INSCRIRE
                         </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
 
-                <p className="mt-10 text-center text-sm text-slate-500">
+                <p className="text-center text-sm font-bold text-slate-400">
                     Déjà membre ?{' '}
-                    <a href="/login" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
+                    <a href="/login" className="text-brand-purple hover:underline">
                         Se connecter
                     </a>
                 </p>
             </div>
-        </div>
+        </main>
     )
 }

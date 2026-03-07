@@ -1,32 +1,38 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FFFFFF;
-  --foreground: #1F2937;
-  --brand-lime: #d9ff00;
-  --brand-lime-soft: #faffdb;
-  --brand-purple: #d9ff00;
-  /* Overriding for compatibility with existing classes */
-  --brand-purple-soft: #faffdb;
-  --brand-indigo: #000000;
+  --background: #FAFAFA;
+  /* Off-white for softer premium feel */
+  --foreground: #111827;
+  /* Rich dark gray */
+  --brand-lime: #CCFF00;
+  /* Neon yellow/green accent */
+  --brand-lime-soft: #F9FFE3;
+  --brand-purple: #4F46E5;
+  /* True Indigo/Purple for massive contrast and professional look */
+  --brand-purple-soft: #EEF2FF;
+  --brand-indigo: #312E81;
   --card-bg: #FFFFFF;
-  --border-soft: #F3F4F6;
+  --border-soft: #E5E7EB;
 }
 
 @theme inline {
   --color-brand-purple: var(--brand-purple);
   --color-brand-purple-soft: var(--brand-purple-soft);
   --color-brand-indigo: var(--brand-indigo);
+  --color-brand-lime: var(--brand-lime);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0A0A0B;
-    --foreground: #F9FAFB;
-    --card-bg: #111113;
-    --border-soft: #1F1F23;
+    --background: #09090B;
+    --foreground: #FAFAFA;
+    --brand-lime: #CCFF00;
+    --brand-purple: #6366F1;
+    --card-bg: #18181B;
+    --border-soft: #27272A;
   }
 }
 
@@ -37,13 +43,27 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Custom transitions and soft shadows */
+/* Premium Visual Utilities */
 .premium-shadow {
-  box-shadow: 0 10px 25px -5px rgba(217, 255, 0, 0.1), 0 8px 10px -6px rgba(217, 255, 0, 0.1);
+  box-shadow: 0 10px 40px -10px rgba(79, 70, 229, 0.15), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  /* Indigo tinted soft shadow */
 }
 
 .premium-card {
-  @apply bg-white dark:bg-zinc-900 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-xl shadow-slate-200/50 dark:shadow-none transition-all hover:scale-[1.01];
+  @apply bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200/60 dark:border-zinc-800 shadow-xl shadow-slate-200/50 dark:shadow-none transition-all duration-300 hover:shadow-2xl hover:shadow-slate-200/60 dark:hover:border-zinc-700/80;
+}
+
+.premium-btn {
+  @apply relative overflow-hidden bg-brand-purple text-white font-semibold rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-brand-purple/30 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+}
+
+.premium-btn::after {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none;
+}
+
+.glass-panel {
+  @apply bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 shadow-lg;
 }
 
 @keyframes marquee {

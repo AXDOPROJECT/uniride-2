@@ -59,7 +59,7 @@ export default async function Login({
 
                         <button
                             type="submit"
-                            className="flex w-full justify-center rounded-3xl bg-brand-purple py-5 text-lg font-black text-white shadow-xl shadow-brand-purple/30 hover:scale-[1.02] active:scale-95 transition-all"
+                            className="w-full premium-btn text-xl gap-3 py-5"
                         >
                             SE CONNECTER
                         </button>

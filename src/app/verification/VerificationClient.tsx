@@ -98,16 +98,16 @@ export default function VerificationClient({ userFullName }: { userFullName: str
     }
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col items-center">
+        <div className="premium-card p-8 flex flex-col items-center max-w-md w-full mx-auto relative overflow-hidden">
 
             {/* INSTRUCTIONS */}
             {step === 1 && (
                 <div className="w-full text-center space-y-6">
-                    <div className="bg-[#ccff00]/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <FileText className="w-8 h-8 text-[#a3cc00]" />
+                    <div className="bg-brand-purple/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border border-brand-purple/20">
+                        <FileText className="w-10 h-10 text-brand-purple" />
                     </div>
-                    <h2 className="text-xl font-semibold">1. Photo de votre Permis</h2>
-                    <p className="text-gray-600 text-sm">
+                    <h2 className="text-2xl font-black text-slate-800 dark:text-white">1. Photo de votre Permis</h2>
+                    <p className="text-slate-500 font-medium text-sm">
                         Prenez une photo claire et lisible du recto de votre permis de conduire. Évitez les reflets.
                     </p>
 
@@ -129,9 +129,9 @@ export default function VerificationClient({ userFullName }: { userFullName: str
 
                     <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="w-full py-4 px-4 bg-[#ccff00] hover:bg-[#b3e600] text-black font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors"
+                        className="w-full premium-btn py-4 gap-3 text-lg"
                     >
-                        <Camera className="w-5 h-5" />
+                        <Camera className="w-6 h-6" />
                         Ouvrir l'appareil photo
                     </button>
                 </div>
@@ -140,11 +140,11 @@ export default function VerificationClient({ userFullName }: { userFullName: str
             {/* SELFIE STEP */}
             {step === 2 && (
                 <div className="w-full text-center space-y-6">
-                    <div className="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <UserIcon className="w-8 h-8 text-blue-500" />
+                    <div className="bg-brand-indigo/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border border-brand-indigo/20">
+                        <UserIcon className="w-10 h-10 text-brand-indigo dark:text-indigo-400" />
                     </div>
-                    <h2 className="text-xl font-semibold">2. Selfie (Face ID)</h2>
-                    <p className="text-gray-600 text-sm">
+                    <h2 className="text-2xl font-black text-slate-800 dark:text-white">2. Selfie (Face ID)</h2>
+                    <p className="text-slate-500 font-medium text-sm">
                         Prenez un selfie en temps réel pour confirmer que vous êtes bien la personne sur le permis.
                     </p>
 
@@ -163,15 +163,15 @@ export default function VerificationClient({ userFullName }: { userFullName: str
 
                     <button
                         onClick={() => selfieInputRef.current?.click()}
-                        className="w-full py-4 px-4 bg-gray-900 hover:bg-black text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors"
+                        className="w-full premium-btn bg-slate-900 dark:bg-zinc-800 hover:shadow-slate-900/30 dark:hover:shadow-zinc-800/50 py-4 gap-3 text-lg"
                     >
-                        <Camera className="w-5 h-5" />
+                        <Camera className="w-6 h-6" />
                         Prendre un Selfie
                     </button>
 
                     <button
                         onClick={() => { setStep(1); setIdImage(null); }}
-                        className="text-gray-500 text-sm font-medium underline"
+                        className="text-slate-400 hover:text-brand-purple text-sm font-bold transition-colors"
                     >
                         Recommencer la première étape
                     </button>
@@ -181,21 +181,21 @@ export default function VerificationClient({ userFullName }: { userFullName: str
             {/* ANALYSIS REVIEW */}
             {step === 3 && (
                 <div className="w-full text-center space-y-6">
-                    <h2 className="text-xl font-semibold">Analyse IA en cours</h2>
-                    <p className="text-gray-600 text-sm pb-4">
-                        Ne fermez pas cette page. Nous comparons votre identité...
+                    <h2 className="text-2xl font-black text-brand-purple animate-pulse">Analyse Sécurisée</h2>
+                    <p className="text-slate-500 font-medium text-sm pb-4">
+                        Ne fermez pas cette page. Nos serveurs valident votre identité...
                     </p>
 
                     <div className="flex justify-center items-center gap-4 py-8">
                         {isAnalyzing ? (
-                            <Loader2 className="w-12 h-12 text-[#ccff00] animate-spin" />
+                            <Loader2 className="w-16 h-16 text-brand-purple animate-spin drop-shadow-[0_0_15px_rgba(79,70,229,0.5)]" />
                         ) : (
                             <button
                                 onClick={submitVerification}
-                                className="w-full py-4 px-4 bg-[#ccff00] hover:bg-[#b3e600] text-black font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors"
+                                className="w-full premium-btn bg-brand-lime text-black hover:shadow-[0_8px_30px_rgb(204,255,0,0.3)] py-4 gap-3 text-lg"
                             >
-                                <RefreshCw className="w-5 h-5" />
-                                Lancer l'analyse sécurisée
+                                <RefreshCw className="w-6 h-6" />
+                                Lancer l'analyse IA
                             </button>
                         )}
                     </div>
