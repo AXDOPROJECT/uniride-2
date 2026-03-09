@@ -75,7 +75,7 @@ export default function ProfileForm({ initialName, initialPhone, isVerified, rat
 
                 <div>
                     <label htmlFor="phone" className="block text-sm font-medium leading-6 text-slate-900 dark:text-slate-200">
-                        Numéro de téléphone <span className="text-xs text-slate-500 font-normal">(Requis pour les trajets)</span>
+                        Numéro de téléphone <span className="text-xs text-slate-500 font-normal">(Optionnel, pour faciliter les contacts)</span>
                     </label>
                     <div className="relative mt-2">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
