@@ -1,7 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
-import { Star, Phone } from 'lucide-react'
+import { Star } from 'lucide-react'
 import LogoutButton from '@/components/LogoutButton'
+import ProfileForm from '@/app/dashboard/ProfileForm'
 
 export default async function ProfilPage() {
     const supabase = await createClient()
@@ -61,19 +62,14 @@ export default async function ProfilPage() {
                     </div>
                 </div>
 
-                {/* Info Fields */}
+                {/* Edit Form */}
                 <div className="space-y-4">
-                    <div className="group premium-card p-5 flex items-center gap-4 bg-white dark:bg-zinc-900">
-                        <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-zinc-800 flex items-center justify-center text-slate-400">
-                            <Phone className="w-6 h-6" />
-                        </div>
-                        <div className="flex-1 text-left">
-                            <span className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-0.5">Téléphone</span>
-                            <span className="text-base font-bold text-slate-900 dark:text-zinc-100">
-                                {profile?.phone || 'Non renseigné'}
-                            </span>
-                        </div>
-                    </div>
+                    <ProfileForm 
+                        initialName={profile?.name || ''}
+                        initialPhone={profile?.phone || ''}
+                        isVerified={profile?.license_status === 'verified'}
+                        rating={profile?.rating || 5}
+                    />
                 </div>
 
                 {/* Logout */}

@@ -30,7 +30,7 @@ export default async function Page() {
             </div>
             <span className="text-xl font-black tracking-tighter text-slate-900 dark:text-white uppercase italic">UNIRIDE</span>
           </div>
-          <p className="text-slate-900 dark:text-white font-black text-2xl uppercase leading-tight italic">
+          <p className="text-slate-900 dark:text-zinc-100 font-black text-2xl uppercase leading-tight italic">
             Voyagez pour <span className="bg-brand-lime text-black px-2 rounded-lg">moins d'un café</span>.
           </p>
         </div>
@@ -61,7 +61,7 @@ export default async function Page() {
         {/* Nearby Rides Section */}
         <div className="space-y-4 pt-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase">Trajets en direct</h2>
+            <h2 className="text-xl font-black text-slate-900 dark:text-zinc-100 uppercase">Trajets en direct</h2>
             <div className="flex items-center gap-1.5 bg-emerald-500/10 px-2 py-1 rounded-full">
               <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
               <span className="text-[10px] font-black text-emerald-600 uppercase">Live</span>

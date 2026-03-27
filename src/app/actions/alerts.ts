@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { revalidatePath } from 'next/cache'
 
 export async function reportUser(reportedUserId: string, reason: string, description: string, rideId?: string) {
     if (!reason || !description) {
@@ -38,4 +39,24 @@ export async function reportUser(reportedUserId: string, reason: string, descrip
     }
 
     return { success: true };
+}
+
+export async function markNotificationAsRead(notificationId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, error: 'Non autorisé' }
+
+    const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('id', notificationId)
+        .eq('user_id', user.id)
+
+    if (error) {
+        console.error("Erreur marquage lu:", error)
+        return { success: false, error: error.message }
+    }
+
+    revalidatePath('/alertes')
+    return { success: true }
 }

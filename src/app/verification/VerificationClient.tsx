@@ -27,13 +27,16 @@ export default function VerificationClient({ userFullName }: { userFullName: str
                 img.src = event.target?.result as string;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800;
-                    const scaleSize = MAX_WIDTH / img.width;
-                    canvas.width = MAX_WIDTH;
+                    // EXTREME COMPRESSION TO BYPASS VERCEL 4.5MB LIMIT
+                    const MAX_WIDTH = 600; 
+                    const scaleSize = Math.min(MAX_WIDTH / img.width, 1);
+                    canvas.width = img.width * scaleSize;
                     canvas.height = img.height * scaleSize;
                     const ctx = canvas.getContext('2d');
-                    ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.8));
+                    if (ctx) {
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    }
+                    resolve(canvas.toDataURL('image/jpeg', 0.6));
                 };
                 img.onerror = (err) => reject(err);
             };
@@ -50,6 +53,8 @@ export default function VerificationClient({ userFullName }: { userFullName: str
             if (isSelfie) {
                 setSelfieImage(compressedBase64)
                 setStep(3)
+                // Submit immediately avoiding React state lag
+                await autoSubmitVerification(compressedBase64)
             } else {
                 setIdImage(compressedBase64)
                 setStep(2)
@@ -60,8 +65,8 @@ export default function VerificationClient({ userFullName }: { userFullName: str
         }
     }
 
-    const submitVerification = async () => {
-        if (!idImage || !selfieImage) return
+    const autoSubmitVerification = async (newSelfieBase64: string) => {
+        if (!idImage) return
 
         setIsAnalyzing(true)
         setError(null)
@@ -69,26 +74,33 @@ export default function VerificationClient({ userFullName }: { userFullName: str
         try {
             const formData = new FormData()
             formData.append('idImage', idImage)
-            formData.append('selfieImage', selfieImage)
+            formData.append('selfieImage', newSelfieBase64)
             formData.append('userFullName', userFullName)
 
             const result = await verifyIdentityAction(formData)
 
             if (result.success) {
+                // Force Next.js to re-fetch Server Components (including profile.license_status)
+                router.refresh()
+                // Show local success state immediately
                 setSuccess(true)
                 setStep(4)
+                
+                // Redirect to /verification so the server re-renders and shows the pending screen
                 setTimeout(() => {
-                    router.push('/proposer')
-                }, 3000)
+                    router.push('/verification')
+                }, 2500)
             } else {
-                setError(result.error || "Échec de la vérification. Veuillez réessayer.")
+                console.error("KYC Action Failed:", result.error)
+                setError(result.error || "Échec de l'envoi (Erreur Serveur).")
                 setStep(1) // Reset to start
                 setIdImage(null)
                 setSelfieImage(null)
             }
-        } catch (err) {
-            console.error(err)
-            setError("Une erreur inattendue est survenue.")
+        } catch (err: any) {
+            console.error("KYC HTTP/Network Error:", err)
+            // Show explicit error on screen to prevent silent failures
+            setError(err?.message || "Erreur de connexion (Image trop lourde ou réseau faible).")
             setStep(1)
             setIdImage(null)
             setSelfieImage(null)
@@ -181,37 +193,34 @@ export default function VerificationClient({ userFullName }: { userFullName: str
             {/* ANALYSIS REVIEW */}
             {step === 3 && (
                 <div className="w-full text-center space-y-6">
-                    <h2 className="text-2xl font-black text-brand-purple animate-pulse">Analyse Sécurisée</h2>
+                    <h2 className="text-2xl font-black text-brand-purple animate-pulse">Envoi sécurisé</h2>
                     <p className="text-slate-500 font-medium text-sm pb-4">
-                        Ne fermez pas cette page. Nos serveurs valident votre identité...
+                        Ne fermez pas cette page. Transmission de vos documents en cours...
                     </p>
 
                     <div className="flex justify-center items-center gap-4 py-8">
-                        {isAnalyzing ? (
-                            <Loader2 className="w-16 h-16 text-brand-purple animate-spin drop-shadow-[0_0_15px_rgba(79,70,229,0.5)]" />
-                        ) : (
-                            <button
-                                onClick={submitVerification}
-                                className="w-full premium-btn bg-brand-lime text-black hover:shadow-[0_8px_30px_rgb(204,255,0,0.3)] py-4 gap-3 text-lg"
-                            >
-                                <RefreshCw className="w-6 h-6" />
-                                Lancer l'analyse IA
-                            </button>
-                        )}
+                        <Loader2 className="w-16 h-16 text-brand-purple animate-spin drop-shadow-[0_0_15px_rgba(79,70,229,0.5)]" />
                     </div>
                 </div>
             )}
 
             {/* SUCCESS */}
             {step === 4 && success && (
-                <div className="w-full text-center space-y-6 animate-pulse">
-                    <div className="bg-green-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-full text-center space-y-6">
+                    <div className="bg-green-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-100 dark:border-green-900/50">
                         <CheckCircle className="w-12 h-12 text-green-500" />
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900">Identité Vérifiée !</h2>
-                    <p className="text-green-600 font-medium">
-                        Votre permis est valide. Vous pouvez maintenant publier des trajets. Redirection en cours...
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Identité Transmise !</h2>
+                    <p className="text-emerald-600 dark:text-emerald-400 font-medium">
+                        Vos documents ont été envoyés avec succès. Notre équipe va les valider manuellement.
                     </p>
+                    <p className="text-xs text-slate-400 dark:text-zinc-500 animate-pulse">Redirection vers l'accueil...</p>
+                    <button 
+                        onClick={() => router.push('/verification')}
+                        className="mt-4 w-full premium-btn bg-slate-900 dark:bg-zinc-800 hover:shadow-slate-900/30 dark:hover:shadow-zinc-800/50 py-4 text-base"
+                    >
+                        Voir mon statut de vérification
+                    </button>
                 </div>
             )}
         </div>

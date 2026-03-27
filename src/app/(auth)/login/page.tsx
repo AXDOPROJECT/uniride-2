@@ -16,7 +16,7 @@ export default async function Login({
                     <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-brand-lime shadow-2xl shadow-brand-lime/20 mb-2 overflow-hidden border-4 border-white dark:border-zinc-800">
                         <img src="/logo.png" alt="UNIRIDE Logo" className="w-full h-full object-cover" />
                     </div>
-                    <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Bonjour !</h1>
+                    <h1 className="text-3xl font-black text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Bonjour !</h1>
                     <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Connectez-vous à UNIRIDE</p>
                 </div>
 

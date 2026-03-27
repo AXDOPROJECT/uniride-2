@@ -28,6 +28,7 @@ export async function updateProfile(formData: FormData) {
     }
 
     revalidatePath('/dashboard')
+    revalidatePath('/profil')
     return { success: true }
 }
 

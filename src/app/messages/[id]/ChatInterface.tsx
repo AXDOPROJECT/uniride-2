@@ -16,7 +16,7 @@ type Message = {
     } | null;
 }
 
-export default function ChatInterface({ rideId, currentUserId, initialMessages }: { rideId: string, currentUserId: string, initialMessages: Message[] }) {
+export default function ChatInterface({ rideId, currentUserId, initialMessages, chatPartners }: { rideId: string, currentUserId: string, initialMessages: Message[], chatPartners?: { name: string, phone: string | null, role: string }[] }) {
     const [messages, setMessages] = useState<Message[]>(initialMessages)
     const [newMessage, setNewMessage] = useState('')
     const [isSending, setIsSending] = useState(false)
@@ -99,9 +99,28 @@ export default function ChatInterface({ rideId, currentUserId, initialMessages }
     return (
         <div className="flex flex-col h-[600px] border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-900">
             {/* Header */}
-            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 border-b border-slate-200 dark:border-slate-700">
-                <h3 className="font-semibold text-slate-900 dark:text-white">Discussion du Trajet</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Restez courtois et organisez votre point de rendez-vous.</p>
+            <div className="bg-slate-50 dark:bg-zinc-800/80 p-4 border-b border-slate-100 dark:border-zinc-800 flex justify-between items-center">
+                <div>
+                    <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tight">Discussion du Trajet</h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Contactez votre partenaire</p>
+                </div>
+
+                {chatPartners && chatPartners.length > 0 && (
+                    <div className="flex flex-col items-end">
+                        {chatPartners.map((partner, idx) => (
+                            <div key={idx} className="text-right">
+                                <div className="text-sm font-black text-brand-purple">{partner.name}</div>
+                                {partner.phone ? (
+                                    <a href={`tel:${partner.phone}`} className="text-xs font-bold text-slate-500 hover:text-brand-purple transition-colors">
+                                        {partner.phone}
+                                    </a>
+                                ) : (
+                                    <span className="text-xs font-bold text-slate-400">Pas de numéro</span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Message Area */}
@@ -121,8 +140,8 @@ export default function ChatInterface({ rideId, currentUserId, initialMessages }
                                     {isMe ? 'Vous' : displayName} • {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                                 <div className={`px-4 py-2 rounded-2xl max-w-[85%] text-sm ${isMe
-                                        ? 'bg-indigo-600 text-white rounded-tr-sm'
-                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-200 rounded-tl-sm'
+                                    ? 'bg-indigo-600 text-white rounded-tr-sm'
+                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-200 rounded-tl-sm'
                                     }`}>
                                     {msg.content}
                                 </div>

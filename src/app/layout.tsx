@@ -50,7 +50,7 @@ export default async function RootLayout({
           <main className="flex-1">
             {children}
           </main>
-          <BottomNav />
+          <BottomNav userId={user?.id} />
         </div>
       </body>
     </html>

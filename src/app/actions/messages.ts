@@ -29,23 +29,23 @@ export async function sendMessage(rideId: string, content: string) {
 
     const isDriver = ride.driver_id === user.id
 
-    let isAcceptedPassenger = false
+    let isAuthorizedPassenger = false
     if (!isDriver) {
         const { data: request, error: reqError } = await supabase
             .from('ride_requests')
-            .select('id')
+            .select('id, status')
             .eq('ride_id', rideId)
             .eq('passenger_id', user.id)
-            .eq('status', 'accepted')
+            .in('status', ['accepted', 'pending'])
             .single()
 
         if (request && !reqError) {
-            isAcceptedPassenger = true
+            isAuthorizedPassenger = true
         }
     }
 
-    if (!isDriver && !isAcceptedPassenger) {
-        throw new Error("Vous n'êtes pas autorisé à envoyer des messages sur ce trajet. Votre demande doit être acceptée.");
+    if (!isDriver && !isAuthorizedPassenger) {
+        throw new Error("Vous n'êtes pas autorisé à envoyer des messages sur ce trajet. Vous devez d'abord réserver ce trajet.");
     }
 
     // 3. Insert the message
@@ -64,6 +64,39 @@ export async function sendMessage(rideId: string, content: string) {
         throw new Error("Erreur lors de l'envoi du message")
     }
 
+    // 4. Create Notifications for recipients
+    // We notify the Driver if a passenger sends a message, and notify all associated passengers if the driver (or another passenger) sends a message.
+    // For simplicity: Notify anyone who is the Driver OR a Passenger (accepted/pending) excluding the sender.
+    
+    // Get all potential recipients: Driver + all passengers (accepted/pending)
+    const { data: allParticipants } = await supabase
+        .from('ride_requests')
+        .select('passenger_id')
+        .eq('ride_id', rideId)
+        .in('status', ['accepted', 'pending']);
+    
+    const recipients = new Set<string>();
+    if (!isDriver) recipients.add(ride.driver_id); // Notify driver if a passenger sent it
+    
+    (allParticipants || []).forEach(p => {
+        if (p.passenger_id !== user.id) {
+            recipients.add(p.passenger_id);
+        }
+    });
+
+    if (recipients.size > 0) {
+        const notificationPayloads = Array.from(recipients).map(uid => ({
+            user_id: uid,
+            title: `Nouveau message`,
+            content: `${user.user_metadata?.name || 'Un utilisateur'} a envoyé : "${content.substring(0, 30)}${content.length > 30 ? '...' : ''}"`,
+            link: `/messages/${rideId}`,
+            is_read: false
+        }));
+
+        await supabase.from('notifications').insert(notificationPayloads);
+    }
+
     revalidatePath(`/messages/${rideId}`)
+    revalidatePath('/alertes')
     return message
 }

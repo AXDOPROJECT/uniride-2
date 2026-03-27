@@ -4,6 +4,8 @@ import ChatInterface from './ChatInterface'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 
+export const revalidate = 0; 
+
 export default async function MessagePage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
     const params = await paramsPromise
     const supabase = await createClient()
@@ -14,15 +16,17 @@ export default async function MessagePage({ params: paramsPromise }: { params: P
         redirect('/login')
     }
 
-    // 2. Fetch context to ensure the user actually belongs in this chat
     const rideId = params.id
+
+    // 2. Fetch critical Ride Info (minimal join that we know works)
     const { data: ride, error: rideError } = await supabase
         .from('rides')
         .select(`
             id,
             origin,
             destination,
-            driver_id
+            driver_id,
+            driver:users!rides_driver_id_fkey(id, name, phone)
         `)
         .eq('id', rideId)
         .single()
@@ -31,35 +35,68 @@ export default async function MessagePage({ params: paramsPromise }: { params: P
         return (
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
                 <p className="text-red-600">Trajet introuvable.</p>
-                <Link href="/dashboard" className="text-indigo-600 hover:text-indigo-500 font-medium">Retour au tableau de bord</Link>
+                <Link href="/dashboard" className="text-indigo-600 hover:text-indigo-500 font-medium font-bold">Retour au tableau de bord</Link>
             </div>
         )
     }
 
     const isDriver = ride.driver_id === user.id
 
-    // Check if the current user is an accepted passenger for this ride
-    const { data: acceptedRequest } = await supabase
+    // Check if the current user is a passenger with an relevant request
+    const { data: userRequest } = await supabase
         .from('ride_requests')
-        .select('id')
+        .select('id, status')
         .eq('ride_id', rideId)
         .eq('passenger_id', user.id)
-        .eq('status', 'accepted')
-        .single()
+        .in('status', ['pending', 'accepted', 'onboarded'])
+        .maybeSingle()
 
-    const isAcceptedPassenger = !!acceptedRequest
+    const isPassenger = !!userRequest
 
-    if (!isDriver && !isAcceptedPassenger) {
+    if (!isDriver && !isPassenger) {
         return (
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-                <p className="text-red-600 text-lg font-semibold">Accès Refusé</p>
-                <p className="text-slate-600 dark:text-slate-400 mt-2">Vous devez être le conducteur ou un passager accepté pour discuter sur ce trajet.</p>
-                <Link href="/dashboard" className="mt-4 inline-block text-indigo-600 hover:text-indigo-500 font-medium">Retour au tableau de bord</Link>
+            <div className="mx-auto max-w-3xl px-6 py-12 text-center space-y-4">
+                <div className="bg-red-50 dark:bg-red-900/10 p-6 rounded-3xl border border-red-100 dark:border-red-900/20 inline-block">
+                   <p className="text-red-600 text-lg font-black uppercase">Accès Refusé</p>
+                </div>
+                <p className="text-slate-600 dark:text-slate-400 font-bold">Vous n'êtes pas autorisé à accéder à cette conversation.</p>
+                <Link href="/dashboard" className="premium-btn py-3 px-8 mt-4 inline-flex">Retour au tableau de bord</Link>
             </div>
         )
     }
 
-    // 3. Fetch initial Message History to pre-hydrate the UI
+    // 3. Fetch partners (all people with accepted/onboarded status)
+    // We do this via a separate query to be absolutely safe with FK joins
+    const { data: requestsWithPartners } = await supabase
+        .from('ride_requests')
+        .select(`
+            status,
+            passenger:users!ride_requests_passenger_id_fkey(name, phone)
+        `)
+        .eq('ride_id', rideId)
+        .in('status', ['accepted', 'onboarded'])
+
+    // Initial partner: The driver
+    const driverData: any = Array.isArray(ride.driver) ? ride.driver[0] : ride.driver
+    let chatPartners: { name: string, phone: string | null, role: string }[] = []
+
+    if (isDriver) {
+        // Driver sees all accepted passengers
+        chatPartners = (requestsWithPartners || []).map((req: any) => ({
+            name: req.passenger?.name || 'Passager',
+            phone: req.passenger?.phone || null,
+            role: 'Passager'
+        }))
+    } else {
+        // Passenger sees the driver
+        chatPartners = [{
+            name: driverData?.name || 'Conducteur',
+            phone: driverData?.phone || null,
+            role: 'Conducteur'
+        }]
+    }
+
+    // 4. Fetch Message History
     const { data: rawMessages } = await supabase
         .from('messages')
         .select(`
@@ -75,34 +112,35 @@ export default async function MessagePage({ params: paramsPromise }: { params: P
         .eq('ride_id', rideId)
         .order('created_at', { ascending: true })
 
-    // Supabase returns related `users` joined as an object if it's a 1-to-1 or single mapping usually,
-    // but sometimes typing inferences cast it to array if not explicitly .single()
     const initialMessages = (rawMessages || []).map(msg => ({
         ...msg,
         users: Array.isArray(msg.users) ? msg.users[0] : msg.users
     }))
 
     return (
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-8 w-full">
-            <div className="mb-6 flex items-center justify-between">
-                <div>
-                    <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
-                        <ArrowLeft className="w-4 h-4" /> Retour
-                    </Link>
-                    <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-                        Discussion
-                    </h2>
-                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                        {ride.origin} <span className="mx-1 text-slate-400">→</span> {ride.destination}
-                    </p>
+        <main className="flex-1 bg-transparent overflow-y-auto">
+            <div className="mx-auto max-w-xl px-6 pt-10 pb-24 space-y-8">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <Link href="/dashboard" className="p-2 -ml-2 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all active:scale-95 inline-flex items-center gap-2 text-slate-500 font-bold text-sm">
+                            <ArrowLeft className="w-5 h-5" /> Retour
+                        </Link>
+                        <h1 className="mt-4 text-3xl font-black text-slate-900 dark:text-white uppercase leading-tight italic">
+                            Discussion
+                        </h1>
+                        <p className="text-sm font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest mt-1">
+                            {ride.origin} <span className="text-brand-purple">→</span> {ride.destination}
+                        </p>
+                    </div>
                 </div>
-            </div>
 
-            <ChatInterface
-                rideId={rideId}
-                currentUserId={user.id}
-                initialMessages={initialMessages as any}
-            />
-        </div>
+                <ChatInterface
+                    rideId={rideId}
+                    currentUserId={user.id}
+                    initialMessages={initialMessages as any}
+                    chatPartners={chatPartners}
+                />
+            </div>
+        </main>
     )
 }
