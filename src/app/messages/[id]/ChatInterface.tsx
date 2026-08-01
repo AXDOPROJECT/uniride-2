@@ -83,13 +83,21 @@ export default function ChatInterface({ rideId, currentUserId, initialMessages, 
         setIsSending(true)
 
         try {
-            await sendMessage(rideId, content)
-            // Note: We don't manually push into `messages` array here.
-            // We rely completely on the Supabase Realtime Subscription `INSERT` above
-            // to loop it back to us and everyone else perfectly synchronized.
+            const result = await sendMessage(rideId, content)
+            if (result?.error) {
+                alert(result.error)
+                setNewMessage(content) // restore failed message text
+            } else if (result?.message) {
+                // Optimistically add message if not already added by realtime subscription
+                const inserted = result.message as Message
+                setMessages(prev => {
+                    if (prev.some(m => m.id === inserted.id)) return prev
+                    return [...prev, inserted]
+                })
+            }
         } catch (error) {
             console.error("Erreur d'envoi", error)
-            alert(error instanceof Error ? error.message : "Erreur")
+            alert(error instanceof Error ? error.message : "Erreur d'envoi du message")
             setNewMessage(content) // restore failed message
         } finally {
             setIsSending(false)

@@ -48,7 +48,7 @@ export default async function MessagePage({ params: paramsPromise }: { params: P
         .select('id, status')
         .eq('ride_id', rideId)
         .eq('passenger_id', user.id)
-        .in('status', ['pending', 'accepted', 'onboarded'])
+        .in('status', ['pending', 'accepted', 'onboarded', 'completed'])
         .maybeSingle()
 
     const isPassenger = !!userRequest
@@ -65,7 +65,7 @@ export default async function MessagePage({ params: paramsPromise }: { params: P
         )
     }
 
-    // 3. Fetch partners (all people with accepted/onboarded status)
+    // 3. Fetch partners (all people with accepted/onboarded/completed/pending status)
     // We do this via a separate query to be absolutely safe with FK joins
     const { data: requestsWithPartners } = await supabase
         .from('ride_requests')
@@ -74,7 +74,7 @@ export default async function MessagePage({ params: paramsPromise }: { params: P
             passenger:users!ride_requests_passenger_id_fkey(name, phone)
         `)
         .eq('ride_id', rideId)
-        .in('status', ['accepted', 'onboarded'])
+        .in('status', ['accepted', 'onboarded', 'completed', 'pending'])
 
     // Initial partner: The driver
     const driverData: any = Array.isArray(ride.driver) ? ride.driver[0] : ride.driver

@@ -43,7 +43,7 @@ export default async function Messages() {
                 )
             `)
             .eq('passenger_id', user.id)
-            .eq('status', 'accepted')
+            .in('status', ['accepted', 'pending', 'onboarded', 'completed'])
     ])
 
     const driverRides = driverRidesRes.data || []
@@ -53,16 +53,17 @@ export default async function Messages() {
 
     // Map Driver Rides
     for (const chat of driverRides) {
-        const acceptedPassengers = (chat.passengers as any[])?.filter(p => p.status === 'accepted') || []
+        const activePassengers = (chat.passengers as any[])?.filter(p => ['accepted', 'onboarded', 'completed', 'pending'].includes(p.status)) || []
 
         let chatName = "En attente de passagers"
         let avatar = "🚗"
 
-        if (acceptedPassengers.length === 1) {
-            chatName = acceptedPassengers[0].user?.name || "Passager"
-            avatar = acceptedPassengers[0].user?.name?.charAt(0).toUpperCase() || "🎓"
-        } else if (acceptedPassengers.length > 1) {
-            chatName = "Mes Passagers"
+        if (activePassengers.length === 1) {
+            chatName = activePassengers[0].user?.name || "Passager"
+            avatar = activePassengers[0].user?.name?.charAt(0).toUpperCase() || "🎓"
+        } else if (activePassengers.length > 1) {
+            const names = activePassengers.map(p => p.user?.name || "Passager").filter(Boolean).join(', ')
+            chatName = names || "Mes Passagers"
             avatar = "👥"
         }
 
