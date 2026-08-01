@@ -4,7 +4,7 @@ import ChatInterface from './ChatInterface'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 
-export const revalidate = 0; 
+export const revalidate = 0;
 
 export default async function MessagePage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
     const params = await paramsPromise
@@ -97,25 +97,33 @@ export default async function MessagePage({ params: paramsPromise }: { params: P
     }
 
     // 4. Fetch Message History
-    const { data: rawMessages } = await supabase
-        .from('messages')
-        .select(`
-            id,
-            content,
-            created_at,
-            sender_id,
-            users (
-                name,
-                email
-            )
-        `)
-        .eq('ride_id', rideId)
-        .order('created_at', { ascending: true })
+    let initialMessages: any[] = []
+    try {
+        const { data: rawMessages, error: msgError } = await supabase
+            .from('messages')
+            .select(`
+                id,
+                content,
+                created_at,
+                sender_id,
+                sender:users!messages_sender_id_fkey(
+                    name,
+                    email
+                )
+            `)
+            .eq('ride_id', rideId)
+            .order('created_at', { ascending: true })
 
-    const initialMessages = (rawMessages || []).map(msg => ({
-        ...msg,
-        users: Array.isArray(msg.users) ? msg.users[0] : msg.users
-    }))
+        if (!msgError && rawMessages) {
+            initialMessages = rawMessages.map(msg => ({
+                ...msg,
+                users: Array.isArray(msg.sender) ? msg.sender[0] : msg.sender
+            }))
+        }
+    } catch (e) {
+        console.error('Error fetching messages:', e)
+        // Continue with empty messages rather than crashing
+    }
 
     return (
         <main className="flex-1 bg-transparent overflow-y-auto">
